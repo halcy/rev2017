@@ -1,0 +1,4 @@
+*.o
+*~
+*.vcxproj.user
+*.suo
