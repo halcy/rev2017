@@ -2,3 +2,6 @@
 *~
 *.vcxproj.user
 *.suo
+*.pdb
+*.log
+*.tlog
