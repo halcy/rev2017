@@ -1,0 +1,56 @@
+/* File generated with Shader Minifier 1.1.4
+ * http://www.ctrl-alt-test.fr
+ */
+#ifndef SHADER_CODE_H_
+# define SHADER_CODE_H_
+
+const char *shader_frag =
+ "#version 420\n"
+ "out vec4 f;"
+ "in vec4 gl_Color;"
+ "layout(size4x32)uniform image2D imageTexture;"
+ "uniform sampler2D imageSampler;"
+ "layout(binding=1)uniform sampler2D shadeMe;"
+ "float i(vec3 v,float i)"
+ "{"
+   "v.x/=.5625;"
+   "vec3 s=v;"
+   "vec2 g=vec2(length(s.xz)-.8,s.y);"
+   "float e=length(g)-.25;"
+   "return e;"
+ "}"
+ "void main()"
+ "{"
+   "vec2 s=gl_FragCoord.xy/vec2(1280.,720.);"
+   "float g=gl_Color.y*3000.*10.,e=.002;"
+   "vec4 v=texture(shadeMe,s.xy);"
+   "vec2 d=vec2(e,0.);"
+   "if(gl_FragCoord.y<30)"
+     "{"
+       "vec4 t=texture(imageSampler,s.xy);"
+       "vec3 y=vec3(0.,-1.,0.);"
+       "vec4 l=t+vec4(normalize(y),0.)*e;"
+       "vec3 z=l.xyz,n=vec3(i(z-d.xyy,g)-i(z+d.xyy,g),i(z-d.yxy,g)-i(z+d.yxy,g),i(z-d.yyx,g)-i(z+d.yyx,g));"
+       "if(i(z,g)>0.)"
+         "l.xyz+=normalize(n)*e*2.;"
+       "l.xyz=mod(l.xyz+vec3(.5),1.)-vec3(.5);"
+       "imageStore(imageTexture,ivec2(gl_FragCoord.xy),l);"
+     "}"
+   "float t[]={.000229,.005977,.060598,.241732,.382928,.241732,.060598,.005977,.000229},z=v.w;"
+   "v=vec4(0);"
+   "float l=0.;"
+   "if(z!=0)"
+     "{"
+       "float y=0;"
+       "for(int n=-4;n<=4;n++)"
+         "{"
+           "for(int r=-4;r<=4;r++)"
+             "v+=texture(shadeMe,(gl_FragCoord.xy+vec2(n,r))/vec2(1280.,720.))*t[n+4]*t[r+4],y+=t[n+4]*t[r+4];"
+         "}"
+       "v=v/y;"
+       "l=clamp(z/30.,0.,1.);"
+     "}"
+   "f=vec4(v.z/10.);"
+ "}";
+
+#endif // SHADER_CODE_H_
