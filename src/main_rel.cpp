@@ -70,9 +70,6 @@ MMTIME MMTime =
 
 const static PIXELFORMATDESCRIPTOR pfd = {0,0,PFD_SUPPORT_OPENGL|PFD_DOUBLEBUFFER,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
-// Image texture binding
-typedef void (APIENTRYP PFNGLBINDIMAGETEXTUREEXTPROC) (GLuint index, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLint format);
-
 static DEVMODE screenSettings = { 
     #if _MSC_VER < 1400
     {0},0,0,148,0,0x001c0000,{0},0,0,0,0,0,0,0,0,0,{0},0,32,XRES,YRES,0,0,      // Visual C++ 6.0
@@ -88,12 +85,6 @@ static DEVMODE screenSettings = {
     };
 
 //--------------------------------------------------------------------------//
-
-// 3D image texture creation / binding
-float textureData[XRES * YRES * 4];
-float textureDataInitial[XRES * YRES * 4];
-float screenData[XRES * YRES * 4];
-float textData[XRES * YRES * 4];
 
 void entrypoint( void )
 { 
@@ -131,46 +122,15 @@ void entrypoint( void )
 	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(p2, s2);
 	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(p2);
 
-	// Create texture data
-	for (int i = 0; i < XRES * YRES; i++) {
-		unsigned int jx = ((i * 42144323) % 34423233) % (XRES * YRES);
-		unsigned int jy = ((i * 12233123) % 85653223) % (XRES * YRES);
-		unsigned int js = ((i * 53764312) % 23412352) % (XRES * YRES);
-		textureDataInitial[i * 4] = ((float)(jx % 1280) / 640.0) - 1.0;
-		textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) - 1.0;
-		// textureDataInitial[i * 4 + 2] = (float)((js % (80*400)) / (4.0 * 400.0) + 5.0);
-		textureDataInitial[i * 4 + 2] = (float)((js % (80 * 400)) / (80.0 * 400.0));
-	}
-
-	// Allow pointing
-	glEnable(GL_POINT_SPRITE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_ONE, GL_ONE);
-
 	// Create textures
-	GLuint imageTextures[3];
-	glGenTextures(3, imageTextures);
+	GLuint imageTextures[1];
+	glGenTextures(1, imageTextures);
 
 	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitial);
-
-	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, imageTextures[1]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, 0);
-
-	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_3D, imageTextures[2]);
-	((PFNGLTEXIMAGE3DPROC)wglGetProcAddress("glTexImage3D"))(GL_TEXTURE_3D, 0, GL_RGBA32F, 512, 512, 512, 0, GL_RGBA, GL_FLOAT, 0);
-
-	/*((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, imageTextures[2]);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);*/
 
 	// Set up window
 	MoveWindow(hWND, 0, 0, 1280, 720, 0);
@@ -180,76 +140,41 @@ void entrypoint( void )
 	waveOutOpen(&hWaveOut, WAVE_MAPPER, &WaveFMT, NULL, 0, CALLBACK_NULL );
 	waveOutPrepareHeader(hWaveOut, &WaveHDR, sizeof(WaveHDR));
 	waveOutWrite(hWaveOut, &WaveHDR, sizeof(WaveHDR));	
-	
-	// put in textures
-	((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(0, imageTextures[0], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
-	((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(1, imageTextures[2], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	// unfortunately, FBOs
 	GLuint fbo, depth_rb;
 	glBindTexture(GL_TEXTURE_2D, 0);
 	((PFNGLGENFRAMEBUFFERSPROC)wglGetProcAddress("glGenFramebuffers"))(1, &fbo);
 	((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, fbo);
-	((PFNGLFRAMEBUFFERTEXTURE2DPROC)wglGetProcAddress("glFramebufferTexture2D"))(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imageTextures[1], 0);
-	/*((PFNGLGENRENDERBUFFERSEXTPROC)wglGetProcAddress("glGenRenderbuffersEXT"))(1, &depth_rb);
-	((PFNGLBINDRENDERBUFFEREXTPROC)wglGetProcAddress("glBindRenderbufferEXT"))(GL_RENDERBUFFER_EXT, depth_rb);
-	((PFNGLRENDERBUFFERSTORAGEEXTPROC)wglGetProcAddress("glRenderbufferStorageEXT"))(GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, XRES, YRES);
-	((PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC)wglGetProcAddress("glFramebufferRenderbufferEXT"))(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, depth_rb);*/
+	((PFNGLFRAMEBUFFERTEXTURE2DPROC)wglGetProcAddress("glFramebufferTexture2D"))(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imageTextures[0], 0);
+	
+    glDisable(GL_DEPTH_TEST);
 
     // run
 	unsigned int samplast = 0;
 	unsigned int samplerun = 0;
     do
     {
+        // get sample position for timing
+        waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
+
+        // FBO
+        ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, fbo);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_BLEND);
 
-		// get sample position for timing
-		waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
-
+        // Draw
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
-		for (int i = 0; i < 1280 * 30; i++) {
-			float ssDist = (float)textureData[i * 4 + 2];
-			float ssSize = (SPHERERAD / ssDist);
-			ssSize = ssDist > 0.02 ? ssSize * (YRES/2.0) : 0;
-			glPointSize(ssSize);
-			glBegin(GL_POINTS);
-			glColor4f(textureData[i * 4 + 3], 0.0, 0.0, 0.0);
-			glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
-			glEnd();
-		}
+        glColor4ui(MMTime.u.sample, 0, 0, 0);
+        glRects(-1, -1, 1, 1);
 
-		glDisable(GL_BLEND);
-
+        // Main FB
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, 0);
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		for (int i = 0; i < 1280 * 30; i++) {
-			float ssDist = (float)textureData[i * 4 + 2];
-			float ssSize = (SPHERERAD / ssDist);
-			ssSize = ssDist > 0.02 ? ssSize * (YRES / 2.0) : 0;
-			glPointSize(ssSize);
-			glBegin(GL_POINTS);
-			glColor4f(textureData[i * 4 + 3], 0.0, 0.0, 0.0);
-			glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
-			glEnd();
-		}
-
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-		glDisable(GL_DEPTH_TEST);
-		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
-
-		/*glReadPixels(0, 0, XRES, YRES, GL_RGBA, GL_FLOAT, screenData);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, screenData);*/
-
-		((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, imageTextures[1]);
-
+        // Draw
+        ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
 		((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, textureData);
+		glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
 		glColor4ui(MMTime.u.sample, 0, 0, 0);
 		glRects(-1, -1, 1, 1);
 
