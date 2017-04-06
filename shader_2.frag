@@ -156,8 +156,8 @@ vec4 pixel(vec2 fragCoord) {
     // Calculate CoC (limited to a maximum size) and store
     float depth = length(pos - eye);
     vec4 fragColor = vec4(colorval.xyz, 0.0);
-    float coc = 0.2 * abs(1.0 - length(eye - lookat) / depth);
-    coc = max(0.01, min(0.35, coc));
+    float coc = 0.4 * abs(1.0 - length(eye - lookat) / depth);
+    coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
     return(vec4(fragColor.rgb, coc));
 }
 

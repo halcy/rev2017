@@ -12,7 +12,7 @@
 
 #define XRES 1280
 #define YRES 720
-// #define FULLSCREEN
+#define FULLSCREEN
 #define XSCALE ((float)YRES/(float)XRES)
 
 #include "shader_code.h"
