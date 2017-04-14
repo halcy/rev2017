@@ -167,20 +167,20 @@ void entrypoint( void )
         // get sample position for timing
         waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
 
-        // FBO
+        // bind FBO to render world into
         ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, fbo);
 
-        // Draw
+        // Draw world, use glColor to send in timing
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
         glColor4ui(MMTime.u.sample, 0, 0, 0);
         glRects(-1, -1, 1, 1);
 
-        // Main FB
+        // bind screen FB
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, 0);
 
-        // Draw
+        // post-process FBO directly to screen FB, send in timing as well
         ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
 		((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
