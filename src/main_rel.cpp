@@ -87,11 +87,18 @@ static DEVMODE screenSettings = {
 
 //--------------------------------------------------------------------------//
 
+float textureData[XRES * YRES * 4];
+float textureDataInitial[XRES * YRES * 4];
+float textureDataInitialZero[XRES * YRES * 4];
+
 void bind_res(int p) {
 	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
 	GLint res_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "res");
 	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }
+
+// Image texture binding
+typedef void (APIENTRYP PFNGLBINDIMAGETEXTUREEXTPROC) (GLuint index, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLint format);
 
 const int create_frag_shader(char *name, const char *shader_frag, HWND hWnd) {
 	// create shader
@@ -147,15 +154,41 @@ void entrypoint( void )
 	bind_res(p);
 	bind_res(p2);
 
+    // Init particle data
+    for (int i = 0; i < XRES * YRES; i++) {
+        unsigned int jx = ((i * 42144323) % 34423233) % (XRES * YRES);
+        unsigned int jy = ((i * 12233123) % 85653223) % (XRES * YRES);
+        unsigned int js = ((i * 53764312) % 23412352) % (XRES * YRES);
+        textureDataInitial[i * 4] = (((float)(jx % 1280) / 640.0) - 1.0) * 0.2;
+        textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) - 1.0;
+        textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.2;
+    }
+
 	// Create textures
-	GLuint imageTextures[1];
-	glGenTextures(1, imageTextures);
+	GLuint imageTextures[3];
+	glGenTextures(3, imageTextures);
 
 	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, 0);
+
+    ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, imageTextures[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitial);
+
+    ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, imageTextures[2]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitialZero);
+
+    // put in textures
+    ((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(0, imageTextures[1], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
+    ((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(1, imageTextures[2], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	// Set up window
 	MoveWindow(hWND, 0, 0, XRES, YRES, 0);
@@ -175,6 +208,10 @@ void entrypoint( void )
 	
     glDisable(GL_DEPTH_TEST);
 
+    // Pointing
+    glEnable(GL_POINT_SPRITE);
+    glBlendFunc(GL_ONE, GL_ONE);
+
     // run
 	unsigned int samplast = 0;
 	unsigned int samplerun = 0;
@@ -192,6 +229,24 @@ void entrypoint( void )
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
         glColor4ui(MMTime.u.sample, 0, 0, 0);
         glRects(-1, -1, 1, 1);
+
+
+        // Make a bunch of points happen
+        ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, textureData);
+        glEnable(GL_BLEND);
+        glPointSize(10.0);
+        glBegin(GL_POINTS);
+        float fltime = MMTime.u.sample / 1000000.0;
+        for (int i = 0; i < 1280 * 10; i++) {
+            float ssDist = (float)textureData[i * 4 + 2];
+            float ssSize = (SPHERERAD / ssDist);
+            ssSize = ssDist > 0.02 ? ssSize * (YRES/2.0) : 0;
+            glColor4f(textureData[i * 4 + 2], textureDataInitial[i * 4], 0.0, 1.0);
+            glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
+        }
+        glEnd();
+        glDisable(GL_BLEND);
 
         // bind screen FB
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, 0);

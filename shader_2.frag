@@ -161,9 +161,27 @@ vec4 pixel(vec2 fragCoord) {
 
 // Image
 void main() {
-    f = vec4(0.0);
-    for(int i = 0; i < 3; i++) {
-    	f += pixel(gl_FragCoord.xy + hash33(vec3(i)).xy);
+    if(gl_Color.w < 0.5) {
+        f = vec4(0.0);
+        for(int i = 0; i < 3; i++) {
+    	    f += pixel(gl_FragCoord.xy + hash33(vec3(i)).xy);
+        }
+        f /= 3.0;
     }
-    f /= 3.0;
+    else {
+        vec2 pos = gl_PointCoord.xy - vec2(0.5);
+	    float radius = length(pos);
+	    if(radius > 0.5) {
+		    discard;
+	    }
+        vec3 col = vec3(0.9, 0.6, 0.4);
+        if(gl_Color.y < 0.01) {
+            col = vec3(0.6, 0.9, 0.4);
+        }
+
+        float coc = 0.4 * abs(1.0 - length(0.2) / gl_Color.x);
+        coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
+
+        f = vec4(col * (0.5 - radius), coc);
+    }
 }
