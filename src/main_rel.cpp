@@ -94,13 +94,13 @@ void bind_res(int p) {
 
 const int create_shader(const char *shader_frag) {
 	// create shader
-	int p = ((PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram"))();
-	const int s = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
-	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(s, 1, &shader_frag, 0);
-	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(s);
-	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(p, s);
-	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(p);
-	return p;
+	int program_id = ((PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram"))();
+	const int shader_id = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
+	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(shader_id, 1, &shader_frag, 0);
+	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(shader_id);
+	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(program_id, shader_id);
+	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(program_id);
+	return program_id;
 }
 
 void entrypoint( void )
