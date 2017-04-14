@@ -4,6 +4,14 @@ out vec4 f;
 in vec4 gl_Color;
 uniform vec2 res;
 
+layout(size4x32,binding=0) uniform image2D imageTexture;
+layout(binding=1) uniform sampler2D imageSampler;
+
+layout(size4x32,binding=1) uniform image2D imageTexture2;
+layout(binding=2) uniform sampler2D imageSampler2;
+
+layout(size4x32,binding=2) uniform image2D outTexture;
+
 // Various knobs to twiddle
 #define MIN_DIST 0.01
 #define STEP_MULTIPLIER 0.9
@@ -66,6 +74,20 @@ vec4 distfunc(vec3 pos) {
     return(dist);
 }
 
+mat3 lookatmat(vec3 eye, vec3 center, vec3 up) {
+	vec3 backward=normalize(eye - center);
+	vec3 right=normalize(cross(up,backward));
+	vec3 actualup=normalize(cross(backward,right));
+
+	return mat3(right, actualup, backward);
+}
+
+vec3 lookat = vec3(0.0, 1.0, 0.0);
+vec3 campos(float t) {
+    float wobble = t * 0.2;
+    return(vec3(sin(wobble) * -1.75, 1.4 + cos(0.0 * 0.3) + 2.0, cos(wobble) * -1.75));
+}
+
 // Renderer
 vec4 pixel(vec2 fragCoord) {
     float t = gl_Color.x * 3000.0 * 10.0;
@@ -74,9 +96,8 @@ vec4 pixel(vec2 fragCoord) {
     vec2 coords = (2.0 * fragCoord.xy - res) / res;
     
     // Set up time dependent stuff
-    float wobble = t * 0.2;
-    vec3 lightpos = vec3(sin(wobble) * -1.75, 1.4 + cos(0.0 * 0.3) + 2.0, cos(wobble) * -1.75);
-    
+    vec3 lightpos = campos(t);
+
     // Camera as eye + imaginary screen at a distance
     vec3 eye = lightpos;
     eye.y -= 2.0;
@@ -85,7 +106,6 @@ vec4 pixel(vec2 fragCoord) {
     sinpow = sinpow * sinpow;
     
     eye.x += sinpow * 0.01;
-    vec3 lookat = vec3(0.0, 1.0, 0.0);
     vec3 lookdir = normalize(lookat - eye);
     vec3 left = normalize(cross(lookdir, vec3(0.0, 1.0, 0.0)));
     vec3 up = normalize(cross(left, lookdir));
@@ -161,7 +181,47 @@ vec4 pixel(vec2 fragCoord) {
 
 // Image
 void main() {
+    float t = gl_Color.x * 3000.0 * 10.0;
+
+    // Render what?
     if(gl_Color.w < 0.5) {
+        if(gl_FragCoord.y <= 10) {
+            mat3 cam = lookatmat(campos(t), lookat, vec3(0.0, 1.0, 0.0));
+            vec2 v = gl_FragCoord.xy / res;
+	        float ms = 0.002;
+
+            // Update particles
+		    vec4 old = texture(imageSampler, v.xy);
+            vec3 dir = texture(imageSampler2, v.xy).xyz;
+		    vec4 new = old + vec4(dir, 0.0) * ms;
+
+            // Block particles
+		    vec3 pos = new.xyz;
+	        vec2 pd = vec2(ms, 0.0);
+		    vec3 displace = vec3(
+			    distfunc(pos-pd.xyy).w - distfunc(pos+pd.xyy).w,
+			    distfunc(pos-pd.yxy).w - distfunc(pos+pd.yxy).w,
+			    distfunc(pos-pd.yyx).w - distfunc(pos+pd.yyx).w
+		    );
+		    /*if(distfunc(pos).w < 0.0) {
+			    new.xyz -= normalize(displace) * ms * 2.0;
+                dir = reflect(dir, normalize(displace)) * 0.8;
+		    }*/
+
+            // Constrain particles
+            dir -= vec3(0.0, ms * 10.0, 0.0);
+            if(length(dir) > ms * 1000.0) {
+                dir = normalize(dir) * ms * 1000.0;
+            }
+		    new.xyz = mod(new.xyz + vec3(1.0), 2.0) - vec3(1.0);
+		    imageStore(imageTexture, ivec2(gl_FragCoord.xy), new);
+            imageStore(imageTexture2, ivec2(gl_FragCoord.xy), vec4(dir, 0.0));
+
+            vec3 outPos = new.xyz * cam;
+            imageStore(outTexture, ivec2(gl_FragCoord.xy), vec4(outPos, 0.0));
+        }
+
+        // Render box
         f = vec4(0.0);
         for(int i = 0; i < 3; i++) {
     	    f += pixel(gl_FragCoord.xy + hash33(vec3(i)).xy);
@@ -169,6 +229,7 @@ void main() {
         f /= 3.0;
     }
     else {
+        // Render particles
         vec2 pos = gl_PointCoord.xy - vec2(0.5);
 	    float radius = length(pos);
 	    if(radius > 0.5) {

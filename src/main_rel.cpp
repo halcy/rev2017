@@ -165,8 +165,8 @@ void entrypoint( void )
     }
 
 	// Create textures
-	GLuint imageTextures[3];
-	glGenTextures(3, imageTextures);
+	GLuint imageTextures[4];
+	glGenTextures(4, imageTextures);
 
 	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
@@ -186,9 +186,17 @@ void entrypoint( void )
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitialZero);
 
+    ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, imageTextures[3]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitialZero);
+
     // put in textures
+    ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
     ((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(0, imageTextures[1], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
     ((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(1, imageTextures[2], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
+    ((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(2, imageTextures[3], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	// Set up window
 	MoveWindow(hWND, 0, 0, XRES, YRES, 0);
@@ -232,16 +240,12 @@ void entrypoint( void )
 
 
         // Make a bunch of points happen
-        ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
+        ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE3);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, textureData);
         glEnable(GL_BLEND);
         glPointSize(10.0);
         glBegin(GL_POINTS);
-        float fltime = MMTime.u.sample / 1000000.0;
         for (int i = 0; i < 1280 * 10; i++) {
-            float ssDist = (float)textureData[i * 4 + 2];
-            float ssSize = (SPHERERAD / ssDist);
-            ssSize = ssDist > 0.02 ? ssSize * (YRES/2.0) : 0;
             glColor4f(textureData[i * 4 + 2], textureDataInitial[i * 4], 0.0, 1.0);
             glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
         }
