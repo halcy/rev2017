@@ -3,12 +3,13 @@
 out vec4 f;
 in vec4 gl_Color;
 uniform sampler2D postproc;
+uniform vec2 res;
 
 // blur with hexagonalish sampling pattern
 // weighs samples according to coc size (so that "in focus" samples count for less)
 // and according to tap nb (weighs outer samples higher)
 vec3 hexablur(sampler2D tex, vec2 uv) {
-    vec2 scale = vec2(1.0) / vec2(1280.0, 720.0);
+    vec2 scale = vec2(1.0) / res;
     vec3 col = vec3(0.0);
     float asum = 0.0;
     float coc = texture(tex, uv).a;
@@ -36,7 +37,7 @@ void main() {
 	float t = gl_Color.x * 3000.0 * 50.0;
 
     f = vec4(1.0, 0.0, 0.2, 0.0);
-	vec2 uv = gl_FragCoord.xy/vec2(1280., 720.);
+	vec2 uv = gl_FragCoord.xy/res;
     f = vec4(hexablur(postproc, uv), 0.0);
         
     // Tonemap and gamma-correct

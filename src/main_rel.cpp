@@ -97,10 +97,10 @@ void entrypoint( void )
     if( ChangeDisplaySettings(&screenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL) return; ShowCursor( 0 );
 
     // create windows
-	HWND hWND = CreateWindow("edit", 0, WS_POPUP|WS_VISIBLE, 0, -100,1280,720,0,0,0,0);
+	HWND hWND = CreateWindow("edit", 0, WS_POPUP|WS_VISIBLE, 0, -100,XRES,YRES,0,0,0,0);
     HDC hDC = GetDC( hWND );
 #else
-	HWND hWND = CreateWindow("edit", 0,  WS_CAPTION|WS_VISIBLE, 0, 0,1280,720,0,0,0,0);
+	HWND hWND = CreateWindow("edit", 0,  WS_CAPTION|WS_VISIBLE, 0, 0,XRES,YRES,0,0,0,0);
     HDC hDC = GetDC( hWND );
 #endif
     // init opengl
@@ -122,6 +122,9 @@ void entrypoint( void )
 	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(p2, s2);
 	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(p2);
 
+	bind_res(p);
+	bind_res(p2);
+
 	// Create textures
 	GLuint imageTextures[1];
 	glGenTextures(1, imageTextures);
@@ -133,7 +136,7 @@ void entrypoint( void )
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, 0);
 
 	// Set up window
-	MoveWindow(hWND, 0, 0, 1280, 720, 0);
+	MoveWindow(hWND, 0, 0, XRES, YRES, 0);
 
 	// Sound
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE)_4klang_render, lpSoundBuffer, 0, 0);
@@ -184,4 +187,10 @@ void entrypoint( void )
 	} while (MMTime.u.sample < SWITCH_AFTER_HALF * 9 && !GetAsyncKeyState(VK_ESCAPE));
 
     ExitProcess( 0 );
+}
+
+void bind_res(int p) {
+	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
+	GLint res_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "res");
+	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }

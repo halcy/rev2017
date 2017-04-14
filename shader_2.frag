@@ -2,6 +2,7 @@
 
 out vec4 f;
 in vec4 gl_Color;
+uniform vec2 res;
 
 // Various knobs to twiddle
 #define MIN_DIST 0.01
@@ -70,7 +71,7 @@ vec4 pixel(vec2 fragCoord) {
     float t = gl_Color.x * 3000.0 * 10.0;
 
     // Screen -1 -> 1 coordinates
-    vec2 coords = (2.0 * fragCoord.xy - vec2(1280.0, 720.0)) / vec2(1280.0, 720.0);
+    vec2 coords = (2.0 * fragCoord.xy - res) / res;
     
     // Set up time dependent stuff
     float wobble = t * 0.2;
