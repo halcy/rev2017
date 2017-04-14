@@ -6,3 +6,6 @@
 *.log
 *.tlog
 bin/*
+*.VC.*db
+ext/main_rel.obj
+ext/main_rel.snr
