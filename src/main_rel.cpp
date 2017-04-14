@@ -92,6 +92,17 @@ void bind_res(int p) {
 	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }
 
+const int create_shader(const char *shader_frag) {
+	// create shader
+	int p = ((PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram"))();
+	const int s = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
+	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(s, 1, &shader_frag, 0);
+	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(s);
+	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(p, s);
+	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(p);
+	return p;
+}
+
 void entrypoint( void )
 { 
 	//#define SWITCH_AFTER (338688 * 2)
@@ -114,19 +125,8 @@ void entrypoint( void )
     wglMakeCurrent(hDC, wglCreateContext(hDC));
 
     // create shader
-    const int p = ((PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram"))();
-    const int s = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
-    ((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(s, 1, &shader_frag, 0);
-    ((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(s);
-    ((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(p,s);
-    ((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(p);
-
-	const int p2 = ((PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram"))();
-	const int s2 = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
-	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(s2, 1, &shader_2_frag, 0);
-	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(s2);
-	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(p2, s2);
-	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(p2);
+	const int p = create_shader(shader_frag);
+	const int p2 = create_shader(shader_2_frag);
 
 	bind_res(p);
 	bind_res(p2);
