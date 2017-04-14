@@ -14,6 +14,7 @@
 #define YRES 720
 //#define FULLSCREEN
 #define XSCALE ((float)YRES/(float)XRES)
+#define SHADER_CHECK
 
 #include "shader_code.h"
 #include "shader_code_2.h"
@@ -92,12 +93,27 @@ void bind_res(int p) {
 	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }
 
-const int create_shader(const char *shader_frag) {
+const int create_frag_shader(char *name, const char *shader_frag, HWND hWnd) {
 	// create shader
 	int program_id = ((PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram"))();
 	const int shader_id = ((PFNGLCREATESHADERPROC)wglGetProcAddress("glCreateShader"))(GL_FRAGMENT_SHADER);
 	((PFNGLSHADERSOURCEPROC)wglGetProcAddress("glShaderSource"))(shader_id, 1, &shader_frag, 0);
 	((PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader"))(shader_id);
+#ifdef SHADER_CHECK
+	GLint isCompiled = 0;
+	((PFNGLGETSHADERIVPROC)wglGetProcAddress("glGetShaderiv"))(shader_id, GL_COMPILE_STATUS, &isCompiled);
+	if (isCompiled == GL_FALSE)	{
+		char error_log[1024];
+		((PFNGLGETSHADERINFOLOGPROC)wglGetProcAddress("glGetShaderInfoLog"))(shader_id, 1024, NULL, error_log);
+		char full_error_log[1024];
+		strcpy(full_error_log, name);
+		strcat(full_error_log, ": ");
+		strcat(full_error_log, error_log);
+		MessageBox(hWnd, full_error_log, "GLSL Error", 0);
+		((PFNGLDELETESHADERPROC)wglGetProcAddress("glDeleteShader"))(shader_id); // Don't leak the shader.
+		ExitProcess(1);
+	}
+#endif
 	((PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader"))(program_id, shader_id);
 	((PFNGLLINKPROGRAMPROC)wglGetProcAddress("glLinkProgram"))(program_id);
 	return program_id;
@@ -125,8 +141,8 @@ void entrypoint( void )
     wglMakeCurrent(hDC, wglCreateContext(hDC));
 
     // create shader
-	const int p = create_shader(shader_frag);
-	const int p2 = create_shader(shader_2_frag);
+	const int p = create_frag_shader("post process", shader_frag, hWND);
+	const int p2 = create_frag_shader("world", shader_2_frag, hWND);
 
 	bind_res(p);
 	bind_res(p2);
