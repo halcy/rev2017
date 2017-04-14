@@ -42,13 +42,13 @@ vec4 distfunc(vec3 pos) {
     
     vec4 dist = box;
     
-    for(int i = 0; i < 3; i++) {
-    	vec3 ballPos = trefoil(t * float(i + 1)) * 0.2;
-        if(i == 1) {
+    for(int i = 0; i < 15; i++) {
+    	vec3 ballPos = trefoil(t * float(i * 0.2 + 1)) * 0.2;
+        if(i % 3 == 1) {
         	ballPos = ballPos.zxy;  
         }
         
-        if(i == 2) {
+        if(i % 3 == 2) {
         	ballPos = ballPos.zxy;  
         } 
        	ballPos.y += 1.2;
@@ -56,12 +56,9 @@ vec4 distfunc(vec3 pos) {
         float radius = 0.3;
         
         radius += (sin(pos.x * 40.0) + cos(pos.z * 40.0) + sin(pos.y * 40.0)) * 0.01;
-        
-        vec3 ballbase = vec3(1.0);
-        vec3 ballsauce = vec3(0.7, 0.15, 0.1);
-        vec3 ballcol = ballbase;
         radius += (hash33(pos) * 0.003).x;
-        vec4 ball = vec4(ballcol, length(ballPos - pos) - radius);
+        vec3 col = vec3(radius > 0.33 ? 100.0 : 0.2)/* * vec3(i * 0.02, 0.01, i * 0.08) */;
+        vec4 ball = vec4(col, length(ballPos - pos) - radius);
         dist = distcompose(dist, ball, 0.3);
     }
  
@@ -76,7 +73,7 @@ vec4 pixel(vec2 fragCoord) {
     vec2 coords = (2.0 * fragCoord.xy - vec2(1280.0, 720.0)) / vec2(1280.0, 720.0);
     
     // Set up time dependent stuff
-    float wobble = 1.0;
+    float wobble = t * 0.2;
     vec3 lightpos = vec3(sin(wobble) * -1.75, 1.4 + cos(0.0 * 0.3) + 2.0, cos(wobble) * -1.75);
     
     // Camera as eye + imaginary screen at a distance
@@ -148,11 +145,11 @@ vec4 pixel(vec2 fragCoord) {
         }
         
     }
-    
+
     // Shading
     float light = max(0.0, dot(normal, shadowray)) * penumbra + 0.1;
-    vec3 colorval = light * distfunc(pos).rgb;
- 
+    vec3 colorval = light * distfunc(pos).rgb * (fract(pos).x > 0.5 ? 1.0 : 0.2);
+   
     // Calculate CoC (limited to a maximum size) and store
     float depth = length(pos - eye);
     vec4 fragColor = vec4(colorval.xyz, 0.0);
