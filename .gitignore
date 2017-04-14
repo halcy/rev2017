@@ -9,3 +9,4 @@ bin/*
 *.VC.*db
 ext/main_rel.obj
 ext/main_rel.snr
+src/shader_code*.h
