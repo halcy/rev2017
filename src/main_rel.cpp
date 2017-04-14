@@ -86,6 +86,12 @@ static DEVMODE screenSettings = {
 
 //--------------------------------------------------------------------------//
 
+void bind_res(int p) {
+	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
+	GLint res_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "res");
+	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
+}
+
 void entrypoint( void )
 { 
 	//#define SWITCH_AFTER (338688 * 2)
@@ -187,10 +193,4 @@ void entrypoint( void )
 	} while (MMTime.u.sample < SWITCH_AFTER_HALF * 9 && !GetAsyncKeyState(VK_ESCAPE));
 
     ExitProcess( 0 );
-}
-
-void bind_res(int p) {
-	((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
-	GLint res_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "res");
-	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }
