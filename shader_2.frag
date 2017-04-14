@@ -37,7 +37,7 @@ vec4 distfunc(vec3 pos) {
     float t = gl_Color.x * 3000.0 * 10.0;
 
   	vec4 box = vec4(0.0);
-    box.xyz = vec3(0.3);
+    box.xyz = vec3(0.3 * pos.y, 0.3, 0.3);
     box.a = min(min(pos.y, -abs(pos.z) + 2.0), -abs(pos.x) + 2.0);;
     
     vec4 dist = box;
@@ -57,7 +57,7 @@ vec4 distfunc(vec3 pos) {
         
         radius += (sin(pos.x * 40.0) + cos(pos.z * 40.0) + sin(pos.y * 40.0)) * 0.01;
         radius += (hash33(pos) * 0.003).x;
-        vec3 col = vec3(radius > 0.33 ? 100.0 : 0.2)/* * vec3(i * 0.02, 0.01, i * 0.08) */;
+        vec3 col = vec3(radius > 0.33 ? 200.0 : 0.2) * vec3(i * 0.1, 0.2 + (15 - i) * 0.4, i * 0.8);
         vec4 ball = vec4(col, length(ballPos - pos) - radius);
         dist = distcompose(dist, ball, 0.3);
     }
