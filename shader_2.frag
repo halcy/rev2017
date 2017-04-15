@@ -29,7 +29,7 @@ float randx(vec2 co){
 }
 
 vec4 tunnel() {
-    /*float time = gl_Color.x * 3000.0 * 10.0;
+    float time = gl_Color.x * 3000.0 * 10.0;
    
     vec2 p=(2.0*gl_FragCoord.xy-res)/min(res.x,res.y)*0.5;
 
