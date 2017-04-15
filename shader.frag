@@ -50,5 +50,5 @@ void main() {
     float sinpow = sin(t * 11.0);
     sinpow = sinpow * sinpow;
     f.rgb *= 0.92 + 0.08 * (sinpow + 1.0) / 2.0;
-	f.rgb *= min( atten( uv.x ), atten( uv.y ) );
+	f.rgb *= (atten( uv.x ) + atten( uv.y )) * 0.5;
 }

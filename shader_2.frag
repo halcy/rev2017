@@ -280,7 +280,7 @@ void main() {
 
         vec3 col = vec3(0.9, 0.9, 0.9);
 
-        float coc = 0.4 * abs(0.8 / partDepth);
+        float coc = 0.8 * abs(0.8 / partDepth);
         coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
 
         f = vec4(col * (0.5 - radius), coc);
