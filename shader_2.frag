@@ -134,7 +134,7 @@ vec4 distfunc(vec3 pos) {
             float stripes = (fract(pos * 5.0).z > 0.5 ? 1.0 : 0.2);
             col = col * stripes;
             vec4 ball = vec4(col, (length(ballPos - pos) - radius));
-            dist = distcompose(dist, ball, 0.3 * stripes);
+            dist = distcompose(dist, ball, 0.3);
         }
     }
 

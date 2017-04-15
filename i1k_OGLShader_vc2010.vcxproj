@@ -235,7 +235,7 @@ shader_minifier.exe shader_2.frag --preserve-externals -o src/shader_code_2.h</C
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/CRINKLER /HASHTRIES:300 /COMPMODE:INSTANT /ORDERTRIES:4000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;4klang.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
@@ -335,10 +335,6 @@ shader_minifier.exe shader_2.frag --no-renaming --preserve-externals -o src/shad
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="4klang.obj" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="4klang.inc" />
     <ClInclude Include="shader_2.frag">
       <FileType>Document</FileType>
     </ClInclude>

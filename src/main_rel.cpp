@@ -134,28 +134,41 @@ const int create_frag_shader(char *name, const char *shader_frag, HWND hWnd) {
 
 void entrypoint( void )
 { 
-	int SWITCH_AFTER = (SAMPLES_PER_TICK * PATTERN_SIZE) * 8;
-	int SWITCH_AFTER_HALF = SWITCH_AFTER / 2;
+    int PATTERN_LEN = (SAMPLES_PER_TICK * PATTERN_SIZE);
+	int SWITCH_BASE = (SAMPLES_PER_TICK * PATTERN_SIZE);
+	int SWITCH_AFTER_HALF = SWITCH_BASE / 2;
 	int outer_width = XRES;
 	int outer_height = YRES;
 
     // Sync stuff
     int effect_advance_at[] = {
-        SWITCH_AFTER, 
-        SWITCH_AFTER * 2, 
-        SWITCH_AFTER * 3, 
-        SWITCH_AFTER * 4, 
-        SWITCH_AFTER * 5, 
-        SWITCH_AFTER * 6
+        PATTERN_LEN * 4,
+        PATTERN_LEN * 18,
+        PATTERN_LEN * 36,
+        PATTERN_LEN * 54, // Done up to here
+        PATTERN_LEN * 60,
+        PATTERN_LEN * 75,
+        PATTERN_LEN * 100,
+    };
+
+    int effect_type[] = {
+        3,
+        2, 
+        0, 
+        1,
+        2,
+        0,
+        1
     };
 
     int wants_particles[] = {
-        0, 
-        1, 
         0,
+        0, 
+        0, 
         1,
         0,
-        1
+        1,
+        0
     };
 
 #ifdef FULLSCREEN
@@ -274,7 +287,17 @@ void entrypoint( void )
             }
         }
 
-        effselector = sceneselector % 3;
+        float to_trans = ((float)(effect_advance_at[sceneselector] - MMTime.u.sample)) / ((float)PATTERN_LEN);
+        to_trans = fabs(to_trans);
+        to_trans = 1.0 - min(to_trans, 1.0);
+
+        float to_trans2 = ((float)(MMTime.u.sample - effect_advance_at[sceneselector - 1])) / ((float)PATTERN_LEN);
+        to_trans2 = fabs(to_trans2);
+        to_trans2 = 1.0 - min(to_trans2, 1.0);
+
+        to_trans =  to_trans + to_trans2;
+
+        effselector = effect_type[sceneselector];
 
         int samplediff = ((float)(MMTime.u.sample - samplast));
         samplast = MMTime.u.sample;
@@ -314,13 +337,14 @@ void entrypoint( void )
         ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
 		((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
-		glColor4ui(MMTime.u.sample, 0, 0, 0);
+		//glColor4ui(MMTime.u.sample, 0, 0, 0);
+        glColor4f(to_trans, effect_type[sceneselector], 0.0, 0.0);
 		glRects(-1, -1, 1, 1);
 
         SwapBuffers(hDC);
 
 		PeekMessageA(0, 0, 0, 0, PM_REMOVE); 
-	} while (MMTime.u.sample < SWITCH_AFTER_HALF * 9 && !GetAsyncKeyState(VK_ESCAPE));
+	} while (MMTime.u.sample < MAX_PATTERNS * SAMPLES_PER_TICK * PATTERN_SIZE && !GetAsyncKeyState(VK_ESCAPE));
 
     ExitProcess( 0 );
 }

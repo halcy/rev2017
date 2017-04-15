@@ -51,4 +51,6 @@ void main() {
     sinpow = sinpow * sinpow;
     f.rgb *= 0.92 + 0.08 * (sinpow + 1.0) / 2.0;
 	f.rgb *= (atten( uv.x ) + atten( uv.y )) * 0.5;
+    
+    f.rgb *= (1.0 - gl_Color.x);
 }
