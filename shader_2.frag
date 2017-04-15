@@ -66,7 +66,9 @@ vec4 tunnel() {
 			else if(wobble<0.22) bright=0.9;
 			else bright=1.0*pattern;
 
-			gl_FragColor=vec4(30.0*vec3(r,g,b)*shadow/(z2+30.0)*bright,1.0);
+            float coc = 0.2 * abs(1.0 - 15.0 / z2);
+            coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
+			return(vec4(30.0*vec3(r,g,b)*shadow/(z2+30.0)*bright, coc));
 		}
 		else
 		{
@@ -235,6 +237,10 @@ vec4 distfunc(vec3 pos) {
             float roundcube = length(max(abs((pos - boxPos)*boxRot) - 0.1, 0.0)) - 0.08;
             dist = distcompose(dist, vec4(col, roundcube), 0.02);
         }
+    }
+
+    if(abs(effselect - 5.0) < 0.1) {
+        dist = render_ducky(t, dist, pos - vec3(0.5, 0.5, 0.0));
     }
     return(dist);
 }
@@ -435,5 +441,8 @@ void main() {
     float effselect = gl_Color.y * 65536.0;
     if(abs(effselect - 2.0) < 0.1) {
         f = twister() * vec4(0.3, 0.3, 0.3, 1.0);
+    }
+    if(abs(effselect - 4.0) < 0.1) {
+        f = tunnel();
     }
 }

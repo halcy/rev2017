@@ -159,18 +159,17 @@ void entrypoint( void )
         PATTERN_LEN * 54, // Cubes
         PATTERN_LEN * 66, // Duck (TODO)
         PATTERN_LEN * 78, // Tunnel
-        PATTERN_LEN * 90, // Finis
-        PATTERN_LEN * 200 // Finis
+        PATTERN_LEN * 90  // Finis (noise)
     };
 
     int effect_type[] = {
-        3,
+        5,
         2, 
         0, 
         1,
-        2,
-        0,
-        1
+        5,
+        4,
+        3
     };
 
     int wants_particles[] = {
@@ -179,7 +178,7 @@ void entrypoint( void )
         0, 
         1,
         0,
-        1,
+        0,
         0
     };
 
