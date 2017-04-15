@@ -254,7 +254,7 @@ void entrypoint( void )
 
     // run
 	int samplast = 0;
-    int fieldselector = 0;
+    int effselector = 0;
     int sceneselector = 0;
     do
     {
@@ -274,7 +274,7 @@ void entrypoint( void )
             }
         }
 
-        fieldselector = sceneselector % 2;
+        effselector = sceneselector % 3;
 
         int samplediff = ((float)(MMTime.u.sample - samplast));
         samplast = MMTime.u.sample;
@@ -285,7 +285,7 @@ void entrypoint( void )
 
         // Draw world, use glColor to send in timing
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
-        glColor4ui(MMTime.u.sample, fieldselector * 65536, samplediff, 0);
+        glColor4ui(MMTime.u.sample, effselector * 65536, samplediff, 0);
         glRects(-1, -1, 1, 1);
 
         // Make a bunch of points happen
@@ -299,7 +299,7 @@ void entrypoint( void )
             glPointSize(10.0);
             glBegin(GL_POINTS);
             for (int i = 0; i < 1280 * 10; i++) {
-                glColor4f(textureData[i * 4 + 3] / 1000.0, fieldselector * 65536, 0.0, 1.0);
+                glColor4f(textureData[i * 4 + 3] / 1000.0, effselector * 65536, 0.0, 1.0);
                 glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
             }
             glEnd();

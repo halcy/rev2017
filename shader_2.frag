@@ -42,10 +42,71 @@ vec3 hash33(vec3 p){
     return fract(vec3(2097152, 262144, 32768)*n); 
 }
 
+float heightfield(float x,float a) {
+    float time = gl_Color.x * 3000.0 * 10.0;
+	//return 0.5;
+	x*=0.4;
+//return 0.5+0.3*cos(3.0*x)*sin(a*4.0);
+	return sin(4.0*x+3.0*sin(2.0*a+time+2.0*sin(3.0*x+time+sin(time*1.4))))*0.5+0.6;
+}
+
+vec4 twister(void) {
+    float time = gl_Color.x * 3000.0 * 10.0;
+	vec2 p=(2.0*gl_FragCoord.xy-res)/min(res.x,res.y);
+    
+    float coc = abs(p.x) * 0.2;
+    if(coc < 0.001) {
+        coc = 0.001;
+    }
+
+	vec3 origin=vec3(time*1.0,sin(time)*0.4+0.4,-1.4);
+	vec3 direction=normalize(vec3(p.x,p.y,1.2-length(p)*0.3));
+
+	float va=0.3;
+	direction.xz=mat2(cos(va),sin(va),-sin(va),cos(va))*direction.xz;
+
+	vec3 camz=vec3(0.0,0.0,1.0);
+	camz.xz=mat2(cos(va),sin(va),-sin(va),cos(va))*camz.xz;
+
+	float a0=atan(origin.y,origin.z);
+	float s=sign(origin.z*direction.y-origin.y*direction.z);
+
+	for(float a=0.0;a<3.141592;a+=0.05)
+	{
+		float a2=s*a+a0;
+		vec3 slicenormal=vec3(0.0,cos(a2),-sin(a2));
+		float t=-dot(origin,slicenormal)/dot(direction,slicenormal);
+		vec3 intersection=origin+direction*t;
+		float ih=length(intersection.yz);
+		float ix=intersection.x;
+		float h=heightfield(ix,a2);
+		if(h>ih)
+		{
+			float epsilon=0.01;
+			float hx=heightfield(ix+epsilon,a2);
+			float ha=heightfield(ix,a2+epsilon);
+			vec3 p=vec3(ix,h*sin(a2),h*cos(a2));
+			vec3 px=vec3(ix+epsilon,hx*sin(a2),hx*cos(a2));
+			vec3 pa=vec3(ix,ha*sin(a2+epsilon),ha*cos(a2+epsilon));
+			vec3 dpdx=(px-p)/epsilon;
+			vec3 dpda=(pa-p)/epsilon;
+			vec3 n=normalize(cross(dpdx,dpda));
+			//float c=h*(1.0+dot(n,vec3(1.0,1.0,1.0))*0.3)+1.0*pow(1.0-dot(n,normalize(origin-p)),3.0);
+			float c=ih*(1.0+dot(n,vec3(1.0,1.0,1.0))*0.3)+2.0*pow(1.0-abs(dot(slicenormal,normalize(origin-p))),3.0);
+
+			return vec4(pow(c, 2.0)*vec3(0.2, 0.5, 0.6),coc);
+		}
+	}
+
+    float brightfrac = fract(p.x + p.y / (2.0 + p.x)) > 0.5 ? 1.0 : 0.0;
+
+	return(vec4(0.7 + (0.4 * (1.0 - brightfrac)), 0.2 * brightfrac, 0.1 + 0.1 * brightfrac, coc * 0.4));
+}
+
 // World
 vec4 distfunc(vec3 pos) {
     float t = gl_Color.x * 3000.0 * 10.0;
-    float fieldselect = gl_Color.y * 65536.0;
+    float effselect = gl_Color.y * 65536.0;
 
   	vec4 box = vec4(0.0);
     box.xyz = vec3(0.3 * pos.y, 0.3, 0.3) * (fract(pos).x > 0.5 ? 1.0 : 0.2);
@@ -53,7 +114,7 @@ vec4 distfunc(vec3 pos) {
     
     vec4 dist = box;
     
-    if(fieldselect < 0.1) {
+    if(effselect < 0.1) {
         for(int i = 0; i < 15; i++) {
     	    vec3 ballPos = trefoil(t * float(i * 0.2 + 1)) * 0.2;
             if(i % 3 == 1) {
@@ -77,7 +138,7 @@ vec4 distfunc(vec3 pos) {
         }
     }
 
-    if(abs(fieldselect - 1.0) < 0.1) {
+    if(abs(effselect - 1.0) < 0.1) {
         for(int i = 0; i < 4; i++) {
             float tx = t * (i + 1) * (i % i == 0 ? -1 : 1);
             vec2 sc = vec2(sin(tx), cos(tx));
@@ -286,5 +347,10 @@ void main() {
         coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
 
         f = vec4(col * (0.5 - radius), coc);
+    }
+
+    float effselect = gl_Color.y * 65536.0;
+    if(abs(effselect - 2.0) < 0.1) {
+        f = twister() * vec4(0.3, 0.3, 0.3, 1.0);
     }
 }
