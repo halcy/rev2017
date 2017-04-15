@@ -103,6 +103,31 @@ vec4 twister(void) {
 	return(vec4(0.7 + (0.4 * (1.0 - brightfrac)), 0.2 * brightfrac, 0.1 + 0.1 * brightfrac, coc * 0.4));
 }
 
+float sdEllipsoid( in vec3 p, in vec3 r ) {
+    return (length( p/r ) - 1.0) * min(min(r.x,r.y),r.z);
+}
+
+vec4 compose_ellipse(in vec4 dist, in vec3 pos, in vec3 obj_pos, in vec3 offset, in vec3 scale, in vec3 color, in float size) {
+	float object_dist = sdEllipsoid( pos - (obj_pos + size*offset), size*scale );
+	return distcompose(dist, vec4(color, object_dist), 0.02);
+}
+
+vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
+    vec2 sc = vec2(sin(t), cos(t));
+    mat3 boxRot = mat3(sc.t, 0.0, sc.s,   0.0,  1.0, 0.0, -sc.s, 0.0, sc.t) *
+			        mat3(sc.t, sc.s, 0.0, -sc.s, sc.t, 0.0,   0.0, 0.0,  1.0);
+    vec3 boxPos = vec3(-0.35, 0.6, -0.35);
+    vec3 eye_col = vec3(20.8, 0.8, 0.1);
+	vec3 body_col = vec3(0.8, 0.8, 0.1);
+	float duck_size = .5;
+	dist = compose_ellipse(dist, pos, boxPos, vec3(0.0),            vec3(0.8,0.3,0.6), body_col, duck_size); // body
+	dist = compose_ellipse(dist, pos, boxPos, vec3(-0.7,0.5,0.0),   vec3(0.3),         body_col, duck_size); // head
+	dist = compose_ellipse(dist, pos, boxPos, vec3(-1.1,0.5,0.0),   vec3(0.1,0.02,0.1), body_col, duck_size); // mouth
+	dist = compose_ellipse(dist, pos, boxPos, vec3(-1.1,0.6,0.05),  vec3(0.02),        eye_col,  duck_size); // eye
+	dist = compose_ellipse(dist, pos, boxPos, vec3(-1.1,0.6,-0.05), vec3(0.02),         eye_col, duck_size); // eye
+	return dist;
+}
+
 // World
 vec4 distfunc(vec3 pos) {
     float t = gl_Color.x * 3000.0 * 10.0;
