@@ -109,13 +109,16 @@ extern "C" float get_Envelope(int instrument) {
 }
 
 float env_decay = 0.0;
-void send_envelope(int p) {
+void send_envelope(int p, float dt) {
     float env = get_Envelope(7) + get_Envelope(6);
-    env_decay = env_decay * 0.8 + env * 0.2;
+    env_decay = env_decay * (1.0 - 0.2 * dt) + env * 0.2 * dt;
 
     ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
     GLint env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope");
     ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env);
+
+    env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope_lp");
+    ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env_decay);
 }
 
 // Image texture binding
@@ -331,7 +334,7 @@ void entrypoint( void )
 
         // Draw world, use glColor to send in timing
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
-        send_envelope(p2);
+        send_envelope(p2, samplediff * 0.0001);
         
         float improve_effect = 0.0;
         if (MMTime.u.sample > effect_advance_at[sceneselector] - PATTERN_LEN * 12) {

@@ -4,6 +4,7 @@ out vec4 f;
 in vec4 gl_Color;
 uniform vec2 res;
 uniform float envelope;
+uniform float envelope_lp;
 uniform float improve;
 
 layout(size4x32,binding=0) uniform image2D imageTexture;
@@ -223,7 +224,7 @@ vec4 distfunc(vec3 pos) {
 
     if(abs(effselect - 1.0) < 0.1) {
         float posproj = dot(pos, normalize(vec3(0.3, 0.7, 0.1)));
-        box.xyz += (fract(posproj * 2.0) > 0.5 ? envelope * 10.0 : 0.0);
+        box.xyz += (fract(posproj * 2.0) > 0.5 ? envelope * 2.0 : 0.0);
     }
 
     vec4 dist = box;
@@ -268,9 +269,9 @@ vec4 distfunc(vec3 pos) {
             boxPos += vec3(-0.35, 0.0, -0.35);
             boxPos.y = i * 0.3 + 0.6;
             vec3 col = hsv2rgb(vec3(
-				sin( 100 * t + i ), // blinkencolors, not sure why we don't get all hues, likely due to the extremes below
-				1.0001, // saturation, going over 1 introduces white areas and fucks up the glow colors, so only *a little*
-				10000.0 // glowiness, can be turned up really high
+				sin( t * 2.0 + i * 0.3 ), // blinkencolors, not sure why we don't get all hues, likely due to the extremes below
+				0.9, // saturation, going over 1 introduces white areas and fucks up the glow colors, so only *a little*
+				100.0 // glowiness, can be turned up really high
 			));
 
             float roundcube = length(max(abs((pos - boxPos)*boxRot) - 0.1, 0.0)) - 0.08;
