@@ -142,7 +142,7 @@ void entrypoint( void )
 
     // Sync stuff
     int effect_advance_at[] = {
-        PATTERN_LEN * 4,
+        PATTERN_LEN * 6,
         PATTERN_LEN * 18,
         PATTERN_LEN * 36,
         PATTERN_LEN * 54, // Done up to here
@@ -289,7 +289,7 @@ void entrypoint( void )
 
         float to_trans = ((float)(effect_advance_at[sceneselector] - MMTime.u.sample)) / ((float)PATTERN_LEN);
         to_trans = fabs(to_trans);
-        to_trans = 1.0 - min(to_trans, 1.0);
+        to_trans = 2.0 - min(to_trans, 2.0);
 
         float to_trans2 = ((float)(MMTime.u.sample - effect_advance_at[sceneselector - 1])) / ((float)PATTERN_LEN);
         to_trans2 = fabs(to_trans2);
@@ -338,7 +338,7 @@ void entrypoint( void )
 		((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
 		//glColor4ui(MMTime.u.sample, 0, 0, 0);
-        glColor4f(to_trans, effect_type[sceneselector], 0.0, 0.0);
+        glColor4f(MMTime.u.sample * 0.00000000001, effect_type[sceneselector] * 0.01, to_trans, 0.0);
 		glRects(-1, -1, 1, 1);
 
         SwapBuffers(hDC);

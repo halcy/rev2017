@@ -5,6 +5,11 @@ in vec4 gl_Color;
 uniform sampler2D postproc;
 uniform vec2 res;
 
+vec3 hash33(vec3 p){ 
+    float n = sin(dot(p, vec3(7, 157, 113)));    
+    return fract(vec3(2097152, 262144, 32768)*n); 
+}
+
 // blur with hexagonalish sampling pattern
 // weighs samples according to coc size (so that "in focus" samples count for less)
 // and according to tap nb (weighs outer samples higher)
@@ -52,5 +57,10 @@ void main() {
     f.rgb *= 0.92 + 0.08 * (sinpow + 1.0) / 2.0;
 	f.rgb *= (atten( uv.x ) + atten( uv.y )) * 0.5;
     
-    f.rgb *= (1.0 - gl_Color.x);
+    float transition = (1.0 - gl_Color.z);
+    if(abs(gl_Color.y * 100.0 - 3.0) < 0.1) {
+        transition = 0.0;
+    }
+    vec3 transnoise = vec3(0.1, 0.1, 0.2) * hash33(vec3(uv.x, uv.y, t) / 8.0).x;
+    f.rgb = mix(transnoise, f.rgb, transition);
 }
