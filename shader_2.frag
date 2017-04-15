@@ -198,6 +198,13 @@ vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
 	return dist;
 }
 
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
+
 // World
 vec4 distfunc(vec3 pos) {
     float t = gl_Color.x * 3000.0 * 10.0;
@@ -247,7 +254,11 @@ vec4 distfunc(vec3 pos) {
             vec3 boxPos =  hash33(vec3(i + 5)) * vec3(0.7, 1.0, 0.7);
             boxPos += vec3(-0.35, 0.0, -0.35);
             boxPos.y = i * 0.3 + 0.6;
-            vec3 col = 200.0 * vec3(0.1 + (i * 0.8) / 4.0, 0.4, 0.1 + ((4 - i) / 4.0 * 0.8));
+            vec3 col = hsv2rgb(vec3(
+				sin( 100 * t + i ), // blinkencolors, not sure why we don't get all hues, likely due to the extremes below
+				1.0001, // saturation, going over 1 introduces white areas and fucks up the glow colors, so only *a little*
+				10000.0 // glowiness, can be turned up really high
+			));
 
             float roundcube = length(max(abs((pos - boxPos)*boxRot) - 0.1, 0.0)) - 0.08;
             dist = distcompose(dist, vec4(col, roundcube), 0.02);
