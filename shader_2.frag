@@ -171,15 +171,30 @@ vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
     vec2 sc = vec2(sin(t), cos(t));
     mat3 boxRot = mat3(sc.t, 0.0, sc.s,   0.0,  1.0, 0.0, -sc.s, 0.0, sc.t) *
 			        mat3(sc.t, sc.s, 0.0, -sc.s, sc.t, 0.0,   0.0, 0.0,  1.0);
-    vec3 boxPos = vec3(-0.35, 0.6, -0.35);
-    vec3 eye_col = vec3(20.8, 0.8, 0.1);
-	vec3 body_col = vec3(0.8, 0.8, 0.1);
-	float duck_size = .5;
-	dist = compose_ellipse(dist, pos, boxPos, vec3(0.0),            vec3(0.8,0.3,0.6), body_col, duck_size); // body
-	dist = compose_ellipse(dist, pos, boxPos, vec3(-0.7,0.5,0.0),   vec3(0.3),         body_col, duck_size); // head
-	dist = compose_ellipse(dist, pos, boxPos, vec3(-1.1,0.5,0.0),   vec3(0.1,0.02,0.1), body_col, duck_size); // mouth
-	dist = compose_ellipse(dist, pos, boxPos, vec3(-1.1,0.6,0.05),  vec3(0.02),        eye_col,  duck_size); // eye
-	dist = compose_ellipse(dist, pos, boxPos, vec3(-1.1,0.6,-0.05), vec3(0.02),         eye_col, duck_size); // eye
+
+    vec3 duck_pos = vec3(-0.05, 0.6, 0.2);
+
+    vec3 water_col = vec3( 0.0, 0.4, 10.0);
+    vec3 eye_col =   vec3(80.8, 0.0,  0.0);
+    vec3 mouth_col = vec3( 1.0, 0.07, 0.05);
+	vec3 body_col =  vec3( 0.8, 0.8,  0.1);
+
+	float duck_size = 0.5;
+
+	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.0,-0.1, 0.0),  vec3(0.8, 0.4,   0.6),  body_col,  duck_size ); // body
+
+	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.5, 0.4, 0.0),  vec3(0.3),              body_col,  duck_size ); // head
+	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.4, 0.0),  vec3(0.1, 0.02,  0.1),  mouth_col, duck_size ); // mouth
+	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.5, 0.1),  vec3(0.03),             eye_col,   duck_size ); // eye
+	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.5,-0.1),  vec3(0.03),             eye_col,   duck_size ); // eye
+
+	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.1, 0.0, 0.52), vec3(0.4, 0.25,  0.25), body_col,  duck_size ); // wing
+	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.1, 0.0,-0.52), vec3(0.4, 0.25,  0.25), body_col,  duck_size ); // wing
+
+	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.7, 0.1, 0.0),  vec3(0.15,0.15,  0.2),  body_col,  duck_size ); // tail
+
+	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.0,-0.4, 0.0),  vec3(0.11,0.0005,0.1),  water_col, duck_size ); // water
+
 	return dist;
 }
 
