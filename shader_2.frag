@@ -77,10 +77,17 @@ vec4 distfunc(vec3 pos) {
 
     if(abs(fieldselect - 1.0) < 0.1) {
         for(int i = 0; i < 4; i++) {
-            vec3 boxPos =  hash33(vec3(i + 5));
-            boxPos += vec3(-0.5, 1.0, -0.5);
-            float roundcube = length(max(abs(pos - boxPos) - 0.1, 0.0)) - 0.08;
-            dist = distcompose(dist, vec4(0.5, 0.5, 0.5, roundcube), 0.02);
+            float tx = t * (i + 1) * (i % i == 0 ? -1 : 1);
+            vec2 sc = vec2(sin(tx), cos(tx));
+            mat3 boxRot = mat3(sc.t, 0.0, sc.s, 0.0, 1.0, 0.0, -sc.s, 0.0, sc.t) *
+            mat3(sc.t, sc.s, 0.0, -sc.s, sc.t, 0.0, 0.0, 0.0, 1.0);
+            vec3 boxPos =  hash33(vec3(i + 5)) * vec3(0.7, 1.0, 0.7);
+            boxPos += vec3(-0.35, 0.0, -0.35);
+            boxPos.y = i * 0.3 + 0.6;
+            vec3 col = 200.0 * vec3(0.1 + (i * 0.8) / 4.0, 0.4, 0.1 + ((4 - i) / 4.0 * 0.8));
+
+            float roundcube = length(max(abs((pos - boxPos)*boxRot) - 0.1, 0.0)) - 0.08;
+            dist = distcompose(dist, vec4(col, roundcube), 0.02);
         }
     }
     return(dist);

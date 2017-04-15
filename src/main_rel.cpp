@@ -159,9 +159,9 @@ void entrypoint( void )
         unsigned int jx = ((i * 42144323) % 34423233) % (XRES * YRES);
         unsigned int jy = ((i * 12233123) % 85653223) % (XRES * YRES);
         unsigned int js = ((i * 53764312) % 23412352) % (XRES * YRES);
-        textureDataInitial[i * 4] = (((float)(jx % 1280) / 1280.0) - 1.0) * 0.3 - 0.5;
+        textureDataInitial[i * 4] = (((float)(jx % 1280) / 1280.0)) * 0.4;
         textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 2.0;
-        textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.3 - 0.5;
+        textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.4;
     }
 
 	// Create textures
