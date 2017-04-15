@@ -163,7 +163,7 @@ void entrypoint( void )
     };
 
     int effect_type[] = {
-        5,
+        3,
         2, 
         0, 
         1,
@@ -177,7 +177,7 @@ void entrypoint( void )
         0, 
         0, 
         1,
-        0,
+        1,
         0,
         0
     };
