@@ -132,6 +132,8 @@ void entrypoint( void )
 	//#define SWITCH_AFTER_HALF 338688
 	int SWITCH_AFTER = 338688 * 2;
 	int SWITCH_AFTER_HALF = SWITCH_AFTER / 2;
+	int outer_width = XRES;
+	int outer_height = YRES;
 #ifdef FULLSCREEN
     // full screen
     if( ChangeDisplaySettings(&screenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL) return; ShowCursor( 0 );
@@ -140,7 +142,11 @@ void entrypoint( void )
 	HWND hWND = CreateWindow("edit", 0, WS_POPUP|WS_VISIBLE, 0, -100,XRES,YRES,0,0,0,0);
     HDC hDC = GetDC( hWND );
 #else
-	HWND hWND = CreateWindow("edit", 0,  WS_CAPTION|WS_VISIBLE, 0, 0,XRES,YRES,0,0,0,0);
+	RECT wrect = { 0, 0, XRES, YRES };
+	AdjustWindowRectEx(&wrect, WS_CAPTION | WS_VISIBLE, FALSE, 0);
+	outer_width = wrect.right - wrect.left;
+	outer_height = wrect.bottom - wrect.top;
+	HWND hWND = CreateWindow("edit", 0, WS_CAPTION | WS_VISIBLE, 0, 0,outer_width,outer_height,0,0,0,0);
     HDC hDC = GetDC( hWND );
 #endif
     // init opengl
@@ -199,7 +205,7 @@ void entrypoint( void )
     ((PFNGLBINDIMAGETEXTUREEXTPROC)wglGetProcAddress("glBindImageTextureEXT"))(2, imageTextures[3], 0, 1, 0, GL_READ_WRITE, GL_RGBA32F);
 
 	// Set up window
-	MoveWindow(hWND, 0, 0, XRES, YRES, 0);
+	MoveWindow(hWND, 0, 0, outer_width, outer_height, 0);
 
 	// Sound
 	CreateThread(0, 0, (LPTHREAD_START_ROUTINE)_4klang_render, lpSoundBuffer, 0, 0);
