@@ -33,6 +33,8 @@ vec3 hexablur(sampler2D tex, vec2 uv) {
     return(col);
 }
 
+float atten (float v) { return 1.0 - pow( abs( ( v - .5 ) * 1.8 ), 6.0 ); }
+
 void main() {
 	float t = gl_Color.x * 3000.0 * 50.0;
 
@@ -48,4 +50,5 @@ void main() {
     float sinpow = sin(t * 11.0);
     sinpow = sinpow * sinpow;
     f.rgb *= 0.92 + 0.08 * (sinpow + 1.0) / 2.0;
+	f.rgb *= min( atten( uv.x ), atten( uv.y ) );
 }
