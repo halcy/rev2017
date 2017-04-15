@@ -149,13 +149,13 @@ vec4 twister(void) {
 			//float c=h*(1.0+dot(n,vec3(1.0,1.0,1.0))*0.3)+1.0*pow(1.0-dot(n,normalize(origin-p)),3.0);
 			float c=ih*(1.0+dot(n,vec3(1.0,1.0,1.0))*0.3)+2.0*pow(1.0-abs(dot(slicenormal,normalize(origin-p))),3.0);
 
-			return vec4(pow(c, 2.0)*vec3(0.2, 0.5, 0.6),coc);
+			return vec4(pow(c + envelope * 0.35, 2.0)*vec3(0.2, 0.5, 0.6),coc);
 		}
 	}
 
     float brightfrac = fract(p.x + p.y / (2.0 + p.x)) > 0.5 ? 1.0 : 0.0;
-
-	return(vec4(0.7 + (0.4 * (1.0 - brightfrac)), 0.2 * brightfrac, 0.1 + 0.1 * brightfrac, coc * 0.4));
+    float env = envelope * 5.0 * brightfrac;
+	return(vec4(0.7 + (0.4 * (1.0 - brightfrac)), 0.2 * brightfrac, 0.1 + 0.1 * brightfrac, coc * 0.4) + vec4(env, env, env, 0.0));
 }
 
 float sdEllipsoid( in vec3 p, in vec3 r ) {
@@ -168,14 +168,15 @@ vec4 compose_ellipse(in vec4 dist, in vec3 pos, in vec3 obj_pos, in vec3 offset,
 }
 
 vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
-    vec2 sc = vec2(sin(t), cos(t));
-    mat3 boxRot = mat3(sc.t, 0.0, sc.s,   0.0,  1.0, 0.0, -sc.s, 0.0, sc.t) *
-			        mat3(sc.t, sc.s, 0.0, -sc.s, sc.t, 0.0,   0.0, 0.0,  1.0);
+    vec2 sc = vec2(sin(t * 3.0), cos(t * 3.0));
+    mat3 boxRot = mat3(sc.t, 0.0, sc.s,   0.0,  1.0, 0.0, -sc.s, 0.0, sc.t) ;
 
-    vec3 duck_pos = vec3( -0.05,0.6,  0.2);
+    pos *= boxRot;
+
+    vec3 duck_pos = vec3( -0.05 + 0.7,0.15 + envelope * 0.05,  0.2 + 0.7);
 
     vec3 water_col = vec3(-1.0, 0.6, 10.0);
-    vec3 eye_col =   vec3(80.8, 0.0,  0.0);
+    vec3 eye_col =   vec3(10000.0, 0.0,  0.0);
     vec3 mouth_col = vec3( 1.0, 0.07, 0.05);
 	vec3 body_col =  vec3( 3.0, 1.5, -0.2);
 
@@ -185,15 +186,15 @@ vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
 
 	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.5, 0.4, 0.0),  vec3(0.3),              body_col,  duck_size ); // head
 	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.4, 0.0),  vec3(0.1, 0.02,  0.1),  mouth_col, duck_size ); // mouth
-	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.5, 0.1),  vec3(0.03),             eye_col,   duck_size ); // eye
-	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.5,-0.1),  vec3(0.03),             eye_col,   duck_size ); // eye
+	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.5, 0.1),  vec3(0.005),             eye_col,   duck_size ); // eye
+	dist = compose_ellipse(dist, pos, duck_pos, vec3(-0.8, 0.5,-0.1),  vec3(0.005),             eye_col,   duck_size ); // eye
 
 	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.1, 0.0, 0.52), vec3(0.4, 0.25,  0.25), body_col,  duck_size ); // wing
 	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.1, 0.0,-0.52), vec3(0.4, 0.25,  0.25), body_col,  duck_size ); // wing
 
 	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.7, 0.1, 0.0),  vec3(0.15,0.15,  0.2),  body_col,  duck_size ); // tail
 
-	dist = compose_ellipse(dist, pos, duck_pos, vec3( 0.0,-0.4, 0.0),  vec3(0.11,0.0005,0.1),  water_col, duck_size ); // water
+	dist = compose_ellipse(dist, pos, vec3(0.0), vec3(0.0),  vec3(0.11,0.0005,0.11),  water_col, duck_size ); // water
 
 	return dist;
 }
@@ -211,11 +212,23 @@ vec4 distfunc(vec3 pos) {
     float effselect = gl_Color.y * 65536.0;
 
   	vec4 box = vec4(0.0);
+
     box.xyz = vec3(0.3 * pos.y, 0.3, 0.3) * (fract(pos).x > 0.5 ? 1.0 : 0.2);
     box.a = min(min(pos.y, -abs(pos.z) + 2.0), -abs(pos.x) + 2.0);;
-    
+
+    if(effselect < 0.1) {
+        box.xyz = vec3(0.3 * pos.y, 0.3, 0.3) * (fract(pos).x > 0.5 ? 1.0 + envelope * 10.0 : 0.2);
+        box.a = min(min(pos.y, -abs(pos.z) + 2.0), -abs(pos.x) + 2.0);;
+    }
+
+    if(abs(effselect - 1.0) < 0.1) {
+        float posproj = dot(pos, normalize(vec3(0.3, 0.7, 0.1)));
+        box.xyz += (fract(posproj * 2.0) > 0.5 ? envelope * 10.0 : 0.0);
+    }
+
     vec4 dist = box;
-    
+    float cocmult = 1.0;
+
     if(effselect < 0.1) {
         for(int i = 0; i < 15; i++) {
     	    vec3 ballPos = trefoil(t * float(i * 0.2 + 1)) * 0.2;
@@ -266,7 +279,7 @@ vec4 distfunc(vec3 pos) {
     }
 
     if(abs(effselect - 5.0) < 0.1) {
-        dist = render_ducky(t, dist, pos - vec3(0.5, 0.5, 0.0));
+        dist = render_ducky(t, dist, pos - vec3(0.0, 0.5, 0.0));
     }
     return(dist);
 }
@@ -412,6 +425,12 @@ void main() {
 
 	        float ms = gl_Color.z * 10000.0;
 
+            float msmult = 1.0;
+            float effselect = gl_Color.y * 65536.0;
+            if(abs(effselect - 5.0) < 0.1) {
+                msmult = 10.0;
+            }
+
             // Update particles
 		    vec4 old = texture(imageSampler, v.xy);
 		    vec4 new = old + vec4(dir, 0.0) * ms;
@@ -425,7 +444,7 @@ void main() {
 			    distfunc(pos-pd.yyx).w - distfunc(pos+pd.yyx).w
 		    );
 		    if(distfunc(pos).w < 0.0) {
-			    new.xyz -= normalize(displace) * ms * 2.0;
+			    new.xyz -= normalize(displace) * ms * 2.0 * msmult;
                 dir = reflect(dir, normalize(displace)) * 0.8;
 		    }
 

@@ -7,17 +7,17 @@
 %define MAX_INSTRUMENTS	8
 %define MAX_VOICES 2
 %define HLD 1
-%define BPM 160.000000
-%define MAX_PATTERNS 142
-%define PATTERN_SIZE_SHIFT 3
+%define BPM 80.000000
+%define MAX_PATTERNS 43
+%define PATTERN_SIZE_SHIFT 4
 %define PATTERN_SIZE (1 << PATTERN_SIZE_SHIFT)
 %define	MAX_TICKS (MAX_PATTERNS*PATTERN_SIZE)
 %define	SAMPLES_PER_TICK 8268
-%define DEF_LFO_NORMALIZE 0.0000604686
+%define DEF_LFO_NORMALIZE 0.0000302343
 %define	MAX_SAMPLES	(SAMPLES_PER_TICK*MAX_TICKS)
 ;%define 	GO4K_USE_16BIT_OUTPUT
 ;%define 	GO4K_USE_GROOVE_PATTERN
-;%define 	GO4K_USE_ENVELOPE_RECORDINGS
+%define 	GO4K_USE_ENVELOPE_RECORDINGS
 ;%define 	GO4K_USE_NOTE_RECORDINGS
 %define 	GO4K_CLIP_OUTPUT
 %define 	GO4K_USE_DST
@@ -419,76 +419,49 @@ section .g4kmuc1 data align=1
 section .data align=1
 %endif
 go4k_patterns
-	db	0, 0, 0, 0, 0, 0, 0, 0, 
-	db	41, HLD, 47, HLD, 48, HLD, 53, HLD, 
-	db	59, HLD, 60, HLD, 65, HLD, 71, HLD, 
-	db	72, HLD, 77, HLD, 83, HLD, 84, HLD, 
-	db	40, HLD, 47, HLD, 48, HLD, 52, HLD, 
-	db	59, HLD, 60, HLD, 64, HLD, 71, HLD, 
-	db	72, HLD, 76, HLD, 83, HLD, 84, HLD, 
-	db	38, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	40, HLD, 45, HLD, 47, HLD, 52, HLD, 
-	db	57, HLD, 59, HLD, 64, HLD, 69, HLD, 
-	db	71, HLD, 76, HLD, 81, HLD, 83, HLD, 
-	db	45, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, 0, 
-	db	41, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	44, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	33, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, 0, 0, 14, HLD, HLD, 26, 
-	db	50, HLD, HLD, HLD, HLD, HLD, 38, HLD, 
-	db	40, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	45, HLD, HLD, HLD, HLD, HLD, 33, HLD, 
-	db	21, HLD, 0, 0, 0, 0, 0, 0, 
-	db	33, HLD, HLD, HLD, HLD, HLD, 0, 0, 
-	db	0, 0, 0, 0, 0, 0, 26, HLD, 
-	db	HLD, HLD, HLD, 0, 0, 0, 0, 0, 
-	db	0, 0, 26, 0, 0, 0, 0, 0, 
-	db	53, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, 53, 0, 0, 53, 
-	db	53, 53, HLD, HLD, HLD, 0, 0, 0, 
-	db	0, 0, 0, 53, 53, HLD, HLD, HLD, 
-	db	0, 0, 0, 53, 0, 0, 0, 0, 
-	db	0, 0, 0, 53, 0, 0, 0, 53, 
-	db	0, 0, 0, 0, 0, 50, HLD, 0, 
-	db	0, 0, 0, 0, 0, 26, 0, 0, 
-	db	26, HLD, 0, 0, 26, HLD, HLD, HLD, 
-	db	26, HLD, 0, 0, 26, HLD, HLD, 0, 
-	db	77, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, 76, HLD, 74, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, 77, HLD, 
-	db	74, 76, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, 74, HLD, 72, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, 74, HLD, 
-	db	76, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, 76, HLD, 
-	db	74, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, 0, 0, 0, 0, 0, 0, 
-	db	76, HLD, HLD, HLD, HLD, HLD, 81, HLD, 
-	db	HLD, HLD, HLD, HLD, 83, HLD, HLD, HLD, 
-	db	HLD, HLD, 86, 88, HLD, HLD, HLD, HLD, 
-	db	86, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, 0, 0, 
-	db	89, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, 88, HLD, 86, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, 81, HLD, 89, HLD, 
-	db	86, 88, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, 86, HLD, 84, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, 86, HLD, 
-	db	88, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, HLD, HLD, 88, HLD, 
-	db	0, 0, 100, 95, 93, 88, 86, 81, 
-	db	88, HLD, 81, HLD, 88, HLD, 93, HLD, 
-	db	81, HLD, 93, HLD, 95, HLD, 81, HLD, 
-	db	95, HLD, 98, 100, HLD, HLD, HLD, HLD, 
-	db	98, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	52, HLD, HLD, HLD, HLD, HLD, 0, 0, 
-	db	50, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	HLD, HLD, HLD, HLD, 0, 0, 0, 0, 
-	db	62, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	69, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
-	db	64, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	db	41, HLD, 47, HLD, 48, HLD, 53, HLD, 59, HLD, 60, HLD, 65, HLD, 71, HLD, 
+	db	72, HLD, 77, HLD, 83, HLD, 84, HLD, 41, HLD, 47, HLD, 48, HLD, 53, HLD, 
+	db	59, HLD, 60, HLD, 65, HLD, 71, HLD, 72, HLD, 77, HLD, 83, HLD, 84, HLD, 
+	db	72, HLD, 77, HLD, 83, HLD, 84, HLD, 40, HLD, 47, HLD, 48, HLD, 52, HLD, 
+	db	59, HLD, 60, HLD, 64, HLD, 71, HLD, 72, HLD, 76, HLD, 83, HLD, 84, HLD, 
+	db	45, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	40, HLD, 47, HLD, 48, HLD, 52, HLD, 59, HLD, 60, HLD, 64, HLD, 71, HLD, 
+	db	72, HLD, 76, HLD, 83, HLD, 84, HLD, 40, HLD, 45, HLD, 47, HLD, 52, HLD, 
+	db	57, HLD, 59, HLD, 64, HLD, 69, HLD, 71, HLD, 76, HLD, 81, HLD, 83, HLD, 
+	db	HLD, HLD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	db	38, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 41, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	44, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 33, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 0, 0, 14, HLD, HLD, 26, 
+	db	45, HLD, HLD, HLD, HLD, HLD, 33, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 40, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	21, HLD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 
+	db	0, 0, 0, 0, 0, 0, 26, HLD, HLD, HLD, HLD, 0, 0, 0, 0, 0, 
+	db	0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, HLD, 
+	db	HLD, HLD, HLD, 0, 0, 0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 
+	db	26, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 26, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, 26, 26, HLD, HLD, HLD, 0, 0, 0, 26, 0, 0, 0, 26, 
+	db	26, 26, HLD, HLD, HLD, 0, 0, 0, 0, 0, 0, 26, 26, HLD, HLD, HLD, 
+	db	0, 0, 0, 26, 0, 0, 0, 0, 26, 26, HLD, HLD, HLD, 0, 0, 0, 
+	db	0, 0, 0, 26, 26, HLD, HLD, HLD, 0, 0, 0, 26, 0, 0, 0, 26, 
+	db	26, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	0, 0, 0, 0, 0, 0, 0, 0, 26, HLD, 0, 0, 26, HLD, HLD, 0, 
+	db	0, 0, 0, 0, 0, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	db	26, HLD, 0, 0, 26, HLD, HLD, HLD, 0, 0, 0, 0, 0, 26, 0, 0, 
+	db	77, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 76, HLD, 74, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, 77, HLD, 74, 76, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, 74, HLD, 72, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 74, HLD, 
+	db	76, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 74, HLD, 72, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, 76, HLD, 74, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	76, HLD, HLD, HLD, HLD, HLD, 81, HLD, HLD, HLD, HLD, HLD, 83, HLD, HLD, HLD, 
+	db	HLD, HLD, 86, 88, HLD, HLD, HLD, HLD, 86, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+	db	50, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
+	db	HLD, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 69, HLD, HLD, HLD, HLD, HLD, HLD, HLD, 
 go4k_patterns_end
 %ifdef USE_SECTIONS
 section .g4kmuc2 data align=1
@@ -496,14 +469,14 @@ section .g4kmuc2 data align=1
 section .data
 %endif
 go4k_pattern_lists
-Instrument0List		db	0, 0, 0, 0, 0, 0, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 1, 2, 3, 4, 5, 6, 1, 2, 3, 1, 2, 3, 1, 2, 3, 4, 5, 6, 7, 8, 8, 8, 8, 8, 1, 2, 3, 1, 2, 3, 4, 5, 6, 9, 10, 11, 1, 2, 3, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 2, 3, 1, 2, 3, 4, 5, 6, 9, 10, 11, 1, 2, 3, 1, 2, 3, 4, 5, 6, 9, 10, 11, 1, 2, 3, 1, 2, 3, 4, 5, 6, 9, 10, 11, 1, 2, 3, 1, 2, 3, 4, 5, 6, 9, 10, 11, 12, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 13, 0, 0, 
-Instrument1List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 8, 8, 14, 8, 8, 15, 8, 8, 16, 8, 17, 7, 8, 8, 14, 8, 8, 15, 8, 8, 16, 8, 17, 18, 8, 8, 8, 8, 17, 7, 8, 8, 14, 8, 8, 12, 8, 8, 19, 8, 17, 7, 8, 8, 14, 8, 8, 12, 8, 8, 19, 8, 17, 20, 8, 8, 8, 8, 17, 21, 0, 0, 0, 0, 0, 7, 8, 8, 14, 8, 8, 12, 8, 8, 19, 8, 17, 7, 8, 8, 14, 8, 8, 12, 8, 8, 19, 8, 17, 7, 8, 8, 14, 8, 8, 12, 8, 8, 19, 8, 17, 7, 8, 8, 14, 8, 8, 12, 8, 8, 19, 8, 17, 20, 8, 8, 8, 8, 17, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-Instrument2List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 24, 25, 23, 8, 8, 8, 8, 8, 8, 13, 0, 0, 
-Instrument3List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 8, 27, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 29, 30, 28, 29, 31, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-Instrument4List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 34, 33, 0, 35, 33, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-Instrument5List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 37, 38, 39, 40, 41, 42, 40, 43, 44, 45, 0, 36, 37, 38, 39, 40, 41, 46, 47, 48, 49, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 37, 38, 39, 40, 41, 42, 40, 43, 44, 45, 0, 36, 37, 38, 39, 40, 41, 46, 47, 48, 49, 50, 0, 51, 52, 53, 54, 55, 56, 57, 55, 58, 49, 45, 59, 51, 52, 53, 54, 55, 56, 60, 61, 62, 63, 50, 0, 64, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-Instrument6List		db	65, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 8, 8, 8, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 66, 0, 0, 0, 0, 16, 66, 0, 0, 0, 0, 0, 0, 0, 0, 
-Instrument7List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 67, 8, 8, 65, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 8, 8, 68, 8, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 67, 8, 8, 51, 8, 8, 57, 8, 8, 42, 8, 8, 67, 8, 8, 51, 8, 8, 69, 8, 8, 69, 8, 8, 12, 8, 8, 8, 8, 8, 8, 66, 0, 0, 0, 0, 0, 0, 0, 0, 
+Instrument0List		db	0, 0, 0, 1, 2, 3, 1, 2, 3, 1, 4, 5, 1, 2, 3, 1, 4, 5, 6, 7, 7, 1, 2, 3, 8, 9, 10, 1, 2, 3, 8, 9, 10, 6, 7, 7, 7, 7, 7, 7, 7, 11, 0, 
+Instrument1List		db	0, 0, 0, 0, 0, 0, 12, 13, 7, 14, 15, 16, 12, 13, 7, 14, 15, 16, 17, 7, 16, 12, 13, 7, 6, 18, 16, 12, 13, 7, 6, 18, 16, 17, 7, 16, 19, 0, 0, 0, 0, 0, 0, 
+Instrument2List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 21, 22, 23, 21, 22, 23, 21, 22, 23, 21, 22, 23, 21, 22, 23, 21, 22, 23, 21, 22, 23, 21, 22, 23, 21, 22, 23, 0, 0, 0, 0, 
+Instrument3List		db	0, 0, 0, 0, 0, 0, 24, 24, 24, 24, 24, 25, 26, 27, 28, 26, 27, 28, 26, 27, 28, 26, 27, 28, 26, 27, 28, 26, 27, 28, 26, 27, 28, 26, 27, 28, 26, 27, 28, 29, 7, 11, 0, 
+Instrument4List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 31, 32, 30, 0, 0, 0, 0, 
+Instrument5List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 33, 34, 35, 36, 37, 11, 33, 34, 35, 38, 39, 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+Instrument6List		db	41, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 7, 7, 7, 7, 11, 0, 
+Instrument7List		db	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 42, 7, 7, 7, 11, 0, 
 go4k_pattern_lists_end
 %ifdef USE_SECTIONS
 section .g4kmuc3 data align=1
@@ -736,16 +709,16 @@ GO4K_BEGIN_PARAMDEF(Instrument2)
 	GO4K_OUT	GAIN(128), AUXSEND(72)
 GO4K_END_PARAMDEF
 GO4K_BEGIN_PARAMDEF(Instrument3)
-	GO4K_ENV	ATTAC(0),DECAY(80),SUSTAIN(0),RELEASE(56),GAIN(28)
+	GO4K_ENV	ATTAC(0),DECAY(82),SUSTAIN(0),RELEASE(56),GAIN(28)
 	GO4K_FST	AMOUNT(126),DEST(0*MAX_UNIT_SLOTS+2+FST_SET)
 	GO4K_ENV	ATTAC(0),DECAY(64),SUSTAIN(38),RELEASE(106),GAIN(128)
 	GO4K_DST	DRIVE(28), SNHFREQ(128), FLAGS(0)
 	GO4K_FST	AMOUNT(76),DEST(6*MAX_UNIT_SLOTS+1+FST_SET)
 	GO4K_FOP	OP(FOP_POP)
-	GO4K_VCO	TRANSPOSE(46),DETUNE(64),PHASE(32),GATES(0),COLOR(128),SHAPE(64),GAIN(128),FLAGS(SINE)
-	GO4K_VCO	TRANSPOSE(76),DETUNE(64),PHASE(128),GATES(0),COLOR(64),SHAPE(64),GAIN(128),FLAGS(PULSE|LFO)
-	GO4K_VCF	FREQUENCY(112),RESONANCE(3),VCFTYPE(LOWPASS)
-	GO4K_DST	DRIVE(64), SNHFREQ(51), FLAGS(0)
+	GO4K_VCO	TRANSPOSE(76),DETUNE(64),PHASE(32),GATES(0),COLOR(128),SHAPE(64),GAIN(128),FLAGS(SINE)
+	GO4K_VCO	TRANSPOSE(76),DETUNE(64),PHASE(0),GATES(0),COLOR(64),SHAPE(64),GAIN(128),FLAGS(PULSE|LFO)
+	GO4K_VCF	FREQUENCY(80),RESONANCE(10),VCFTYPE(HIGHPASS)
+	GO4K_DST	DRIVE(99), SNHFREQ(37), FLAGS(0)
 	GO4K_FOP	OP(FOP_ADDP)
 	GO4K_FOP	OP(FOP_MULP)
 	GO4K_PAN	PANNING(64)
@@ -830,7 +803,7 @@ GO4K_BEGIN_PARAMDEF(Global)
 	GO4K_FOP	OP(FOP_XCH)
 	GO4K_ACC	ACCTYPE(OUTPUT)
 	GO4K_FOP	OP(FOP_ADDP2)
-	GO4K_OUT	GAIN(64), AUXSEND(0)
+	GO4K_OUT	GAIN(86), AUXSEND(0)
 	GO4K_VCO	TRANSPOSE(36),DETUNE(64),PHASE(0),GATES(0),COLOR(128),SHAPE(64),GAIN(128),FLAGS(SINE|LFO)
 	GO4K_FSTG	AMOUNT(27),DEST((0*go4k_instrument.size*MAX_VOICES/4)+(2*MAX_UNIT_SLOTS+5)+(go4k_instrument.workspace/4)+FST_SET+FST_POP)
 GO4K_END_PARAMDEF
@@ -860,8 +833,8 @@ _go4k_delay_times
 	dw 1516
 	dw 1580
 	dw 1642
+	dw 33075
+	dw 24806
 	dw 16537
-	dw 12403
 	dw 8268
-	dw 4134
 %endif

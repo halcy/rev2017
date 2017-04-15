@@ -95,6 +95,7 @@ static DEVMODE screenSettings = {
 
 float textureData[XRES * YRES * 4];
 float textureDataInitial[XRES * YRES * 4];
+float textureDataInitialDuck[XRES * YRES * 4];
 float textureDataInitialZero[XRES * YRES * 4];
 
 void bind_res(int p) {
@@ -103,15 +104,18 @@ void bind_res(int p) {
 	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }
 
-/*float get_Envelope(int instrument) {
-    return(&_4klang_envelope_buffer)[((MMTime.u.sample >> 8) << 5) + 2*instrument];
-}*/
+extern "C" float get_Envelope(int instrument) {
+    return(&_4klang_envelope_buffer)[((MMTime.u.sample >> 8) << 5) + instrument];
+}
 
+float env_decay = 0.0;
 void send_envelope(int p) {
-    /*float env = get_Envelope(0);
+    float env = get_Envelope(7) + get_Envelope(6);
+    env_decay = env_decay * 0.8 + env * 0.2;
+
     ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
     GLint env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope");
-    ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env);*/
+    ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env);
 }
 
 // Image texture binding
@@ -145,9 +149,7 @@ const int create_frag_shader(char *name, const char *shader_frag, HWND hWnd) {
 
 void entrypoint( void )
 { 
-    int PATTERN_LEN = (SAMPLES_PER_TICK * PATTERN_SIZE);
-	int SWITCH_BASE = (SAMPLES_PER_TICK * PATTERN_SIZE);
-	int SWITCH_AFTER_HALF = SWITCH_BASE / 2;
+    int PATTERN_LEN = (SAMPLES_PER_TICK * PATTERN_SIZE) / 2.0;
 	int outer_width = XRES;
 	int outer_height = YRES;
 
@@ -157,9 +159,9 @@ void entrypoint( void )
         PATTERN_LEN * 18, // Twister
         PATTERN_LEN * 36, // Balls
         PATTERN_LEN * 54, // Cubes
-        PATTERN_LEN * 66, // Duck (TODO)
+        PATTERN_LEN * 66, // Duck
         PATTERN_LEN * 78, // Tunnel
-        PATTERN_LEN * 90  // Finis (noise)
+        PATTERN_LEN * 92  // Finis (noise)
     };
 
     int effect_type[] = {
@@ -216,6 +218,10 @@ void entrypoint( void )
         textureDataInitial[i * 4] = (((float)(jx % 1280) / 1280.0)) * 0.4;
         textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 2.0;
         textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.4;
+
+        textureDataInitialDuck[i * 4] = (((float)(jx % 1280) / 1280.0)) * 0.2 - 1.2;
+        textureDataInitialDuck[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 1.0;
+        textureDataInitialDuck[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.2;
     }
 
 	// Create textures
@@ -290,8 +296,14 @@ void entrypoint( void )
             sceneselector++;
 
             if(wants_particles[sceneselector]) {
-                ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitial);
+                if (effect_type[sceneselector] == 5) {
+                    ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitialDuck);
+                }
+                else {
+                    ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
+                    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitial);
+                }
 
                 ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE2);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitialZero);
