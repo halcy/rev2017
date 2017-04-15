@@ -18,7 +18,7 @@
 #define XRES 1280
 #define YRES 720
 #endif
-//#define FULLSCREEN
+#define FULLSCREEN
 #define XSCALE ((float)YRES/(float)XRES)
 #define SHADER_CHECK
 
@@ -222,8 +222,8 @@ void entrypoint( void )
         textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 2.0;
         textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.4;
 
-        textureDataInitialDuck[i * 4] = (((float)(jx % 1280) / 1280.0)) * 0.2 - 1.2;
-        textureDataInitialDuck[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 1.0;
+        textureDataInitialDuck[i * 4] = (((float)(jx % 1280) / 1280.0)) * 0.2 - 1.1;
+        textureDataInitialDuck[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 0.1;
         textureDataInitialDuck[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.2;
     }
 

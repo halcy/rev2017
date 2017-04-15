@@ -174,7 +174,7 @@ vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
 
     pos *= boxRot;
 
-    vec3 duck_pos = vec3( -0.05 + 0.7,0.15 + envelope * 0.05,  0.2 + 0.7);
+    vec3 duck_pos = vec3( -0.05 + 0.7,0.15 + envelope_lp * 1.0,  0.2 + 0.7);
 
     vec3 water_col = vec3(-1.0, 0.6, 10.0);
     vec3 eye_col =   vec3(10000.0, 0.0,  0.0);
@@ -224,7 +224,8 @@ vec4 distfunc(vec3 pos) {
 
     if(abs(effselect - 1.0) < 0.1) {
         float posproj = dot(pos, normalize(vec3(0.3, 0.7, 0.1)));
-        box.xyz += (fract(posproj * 2.0) > 0.5 ? envelope * 2.0 : 0.0);
+        box.xyz = vec3(0.1, 0.3 * pos.y, 0.3) * (fract(pos).z > 0.5 ? 1.0 : 0.2);
+        box.xyz += (fract(posproj * 2.0) > 0.5 ? envelope * 0.5 : 0.0);
     }
 
     vec4 dist = box;
@@ -407,18 +408,13 @@ void main() {
     // Render what?
     if(gl_Color.w < 0.5) {
         // Render box
-        f = vec4(0.0);
         float depth;
-        for(int i = 0; i < 3; i++) {
-    	    f += pixel(gl_FragCoord.xy + hash33(vec3(i)).xy, depth);
-        }
-        f /= 3.0;
-
-        // Move particles
-
+        f = pixel(gl_FragCoord.xy + hash33(vec3(gl_FragCoord.xy, 1.0)).xy, depth);
+       
         // Preload dir here for HACKS reasons
         vec3 dir = texture(imageSampler2, v.xy).xyz;
 
+        // Move particles
         if(gl_FragCoord.y <= 10) {
             vec3 eye = campos(t);
             mat4 cam = lookatmat(eye, lookat, vec3(0.0, 1.0, 0.0));
