@@ -24,7 +24,7 @@ layout(binding=3) uniform sampler2D outSampler;
 #define SHADOW_OFFSET 0.02
 #define SHADOW_HARDNESS 32.0
 
-float randx(vec2 co){
+float rand(vec2 co){
     return(fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453));
 }
 
