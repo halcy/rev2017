@@ -10,8 +10,14 @@
 #include "glext.h"
 #include <cstdlib>
 
+//#define tiny
+#ifdef tiny
+#define XRES 228
+#define YRES 140
+#else
 #define XRES 1280
 #define YRES 720
+#endif
 //#define FULLSCREEN
 #define XSCALE ((float)YRES/(float)XRES)
 #define SHADER_CHECK
