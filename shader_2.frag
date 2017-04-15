@@ -11,6 +11,7 @@ layout(size4x32,binding=1) uniform image2D imageTexture2;
 layout(binding=2) uniform sampler2D imageSampler2;
 
 layout(size4x32,binding=2) uniform image2D outTexture;
+layout(binding=3) uniform sampler2D outSampler;
 
 // Various knobs to twiddle
 #define MIN_DIST 0.01
@@ -44,6 +45,7 @@ vec3 hash33(vec3 p){
 // World
 vec4 distfunc(vec3 pos) {
     float t = gl_Color.x * 3000.0 * 10.0;
+    float fieldselect = gl_Color.y * 65536.0;
 
   	vec4 box = vec4(0.0);
     box.xyz = vec3(0.3 * pos.y, 0.3, 0.3);
@@ -51,62 +53,79 @@ vec4 distfunc(vec3 pos) {
     
     vec4 dist = box;
     
-    for(int i = 0; i < 15; i++) {
-    	vec3 ballPos = trefoil(t * float(i * 0.2 + 1)) * 0.2;
-        if(i % 3 == 1) {
-        	ballPos = ballPos.zxy;  
-        }
+    if(fieldselect < 0.1) {
+        for(int i = 0; i < 15; i++) {
+    	    vec3 ballPos = trefoil(t * float(i * 0.2 + 1)) * 0.2;
+            if(i % 3 == 1) {
+        	    ballPos = ballPos.zxy;  
+            }
         
-        if(i % 3 == 2) {
-        	ballPos = ballPos.zxy;  
-        } 
-       	ballPos.y += 1.2;
+            if(i % 3 == 2) {
+        	    ballPos = ballPos.zxy;  
+            } 
+       	    ballPos.y += 1.2;
        	
-        float radius = 0.3;
+            float radius = 0.3;
         
-        radius += (sin(pos.x * 40.0) + cos(pos.z * 40.0) + sin(pos.y * 40.0)) * 0.01;
-        radius += (hash33(pos) * 0.003).x;
-        vec3 col = vec3(radius > 0.33 ? 200.0 : 0.2) * vec3(i * 0.1, 0.2 + (15 - i) * 0.4, i * 0.8);
-        vec4 ball = vec4(col, length(ballPos - pos) - radius);
-        dist = distcompose(dist, ball, 0.3);
+            radius += (sin(pos.x * 40.0) + cos(pos.z * 40.0) + sin(pos.y * 40.0)) * 0.01;
+            radius += (hash33(pos) * 0.003).x;
+            vec3 col = vec3(radius > 0.33 ? 200.0 : 0.2) * vec3(i * 0.1, 0.2 + (15 - i) * 0.4, i * 0.8);
+            vec4 ball = vec4(col, length(ballPos - pos) - radius);
+            dist = distcompose(dist, ball, 0.3);
+        }
     }
- 
+
+    if(abs(fieldselect - 1.0) < 0.1) {
+        for(int i = 0; i < 4; i++) {
+            vec3 boxPos =  hash33(vec3(i + 5));
+            boxPos += vec3(-0.5, 1.0, -0.5);
+            float roundcube = length(max(abs(pos - boxPos) - 0.1, 0.0)) - 0.08;
+            dist = distcompose(dist, vec4(0.5, 0.5, 0.5, roundcube), 0.02);
+        }
+    }
     return(dist);
 }
 
-mat3 lookatmat(vec3 eye, vec3 center, vec3 up) {
+mat4 lookatmat(vec3 eye, vec3 center, vec3 up) {
 	vec3 backward=normalize(eye - center);
 	vec3 right=normalize(cross(up,backward));
 	vec3 actualup=normalize(cross(backward,right));
 
-	return mat3(right, actualup, backward);
+	return mat4(
+        vec4(right, -dot(right, eye)), 
+        vec4(actualup, -dot(actualup, eye)), 
+        vec4(backward, -dot(backward, eye)),
+        vec4(0.0, 0.0, 0.0, 1.0)
+    );
 }
 
 vec3 lookat = vec3(0.0, 1.0, 0.0);
 vec3 campos(float t) {
     float wobble = t * 0.2;
-    return(vec3(sin(wobble) * -1.75, 1.4 + cos(0.0 * 0.3) + 2.0, cos(wobble) * -1.75));
+    return(vec3(sin(wobble) * -1.75, 2.4, cos(wobble) * -1.75));
 }
 
 // Renderer
-vec4 pixel(vec2 fragCoord) {
+vec4 pixel(vec2 fragCoord, out float depth) {
     float t = gl_Color.x * 3000.0 * 10.0;
 
     // Screen -1 -> 1 coordinates
-    vec2 coords = (2.0 * fragCoord.xy - res) / res;
-    
-    // Set up time dependent stuff
-    vec3 lightpos = campos(t);
+    vec2 coords = (2.0 * fragCoord.xy - res) / res.x;
 
     // Camera as eye + imaginary screen at a distance
-    vec3 eye = lightpos;
-    eye.y -= 2.0;
+    vec3 eye = campos(t);
+    vec3 lightpos = eye;
+    lightpos.y += 2.0;
     
     float sinpow = sin(t * 5.0);
     sinpow = sinpow * sinpow;
     
-    eye.x += sinpow * 0.01;
-    vec3 lookdir = normalize(lookat - eye);
+    //eye.x += sinpow * 0.01;
+
+    //vec3 looksfsddir = normalize(lookat - eye);
+    eye = (vec4(0.0, 0.0, 0.0, 1.0) * inverse(lookatmat(eye, lookat, vec3(0.0, 1.0, 0.0)))).xyz;
+    vec3 lookdir = normalize((vec4(0.0, 0.0, -1.0, 0.0) * inverse(lookatmat(eye, lookat, vec3(0.0, 1.0, 0.0)))).xyz);
+
     vec3 left = normalize(cross(lookdir, vec3(0.0, 1.0, 0.0)));
     vec3 up = normalize(cross(left, lookdir));
     vec3 lookcenter = eye + lookdir;
@@ -172,7 +191,7 @@ vec4 pixel(vec2 fragCoord) {
     vec3 colorval = light * distfunc(pos).rgb * (fract(pos).x > 0.5 ? 1.0 : 0.2);
    
     // Calculate CoC (limited to a maximum size) and store
-    float depth = length(pos - eye);
+    depth = length(pos - eye);
     vec4 fragColor = vec4(colorval.xyz, 0.0);
     float coc = 0.4 * abs(1.0 - length(eye - lookat) / depth);
     coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
@@ -181,66 +200,80 @@ vec4 pixel(vec2 fragCoord) {
 
 // Image
 void main() {
+    // Screenspace pos 
+    vec2 v = gl_FragCoord.xy / res;
+
     float t = gl_Color.x * 3000.0 * 10.0;
 
     // Render what?
     if(gl_Color.w < 0.5) {
+        // Render box
+        f = vec4(0.0);
+        float depth;
+        for(int i = 0; i < 3; i++) {
+    	    f += pixel(gl_FragCoord.xy + hash33(vec3(i)).xy, depth);
+        }
+        f /= 3.0;
+
+        // Move particles
+
+        // Preload dir here for HACKS reasons
+        vec3 dir = texture(imageSampler2, v.xy).xyz;
+
         if(gl_FragCoord.y <= 10) {
-            mat3 cam = lookatmat(campos(t), lookat, vec3(0.0, 1.0, 0.0));
-            vec2 v = gl_FragCoord.xy / res;
-	        float ms = 0.002;
+            vec3 eye = campos(t);
+            mat4 cam = lookatmat(eye, lookat, vec3(0.0, 1.0, 0.0));
+            vec3 offset = vec3(0.0, 2.0, 0.0);
+
+	        float ms = gl_Color.z * 10000.0;
 
             // Update particles
 		    vec4 old = texture(imageSampler, v.xy);
-            vec3 dir = texture(imageSampler2, v.xy).xyz;
 		    vec4 new = old + vec4(dir, 0.0) * ms;
 
             // Block particles
-		    vec3 pos = new.xyz;
+		    vec3 pos = new.xyz + offset;
 	        vec2 pd = vec2(ms, 0.0);
 		    vec3 displace = vec3(
 			    distfunc(pos-pd.xyy).w - distfunc(pos+pd.xyy).w,
 			    distfunc(pos-pd.yxy).w - distfunc(pos+pd.yxy).w,
 			    distfunc(pos-pd.yyx).w - distfunc(pos+pd.yyx).w
 		    );
-		    /*if(distfunc(pos).w < 0.0) {
+		    if(distfunc(pos).w < 0.0) {
 			    new.xyz -= normalize(displace) * ms * 2.0;
                 dir = reflect(dir, normalize(displace)) * 0.8;
-		    }*/
+		    }
 
             // Constrain particles
             dir -= vec3(0.0, ms * 10.0, 0.0);
             if(length(dir) > ms * 1000.0) {
                 dir = normalize(dir) * ms * 1000.0;
             }
-		    new.xyz = mod(new.xyz + vec3(1.0), 2.0) - vec3(1.0);
+		    //new.xyz = mod(new.xyz + vec3(2.0), 4.0) - vec3(2.0);
 		    imageStore(imageTexture, ivec2(gl_FragCoord.xy), new);
-            imageStore(imageTexture2, ivec2(gl_FragCoord.xy), vec4(dir, 0.0));
 
-            vec3 outPos = new.xyz * cam;
-            imageStore(outTexture, ivec2(gl_FragCoord.xy), vec4(outPos, 0.0));
+            vec3 outPos = (vec4(new.xyz + offset, 1.0) * cam).xyz;
+            imageStore(outTexture, ivec2(gl_FragCoord.xy), vec4(outPos, length(outPos)));
         }
 
-        // Render box
-        f = vec4(0.0);
-        for(int i = 0; i < 3; i++) {
-    	    f += pixel(gl_FragCoord.xy + hash33(vec3(i)).xy);
-        }
-        f /= 3.0;
+        // Direction of particle but also depth of fragment in w. Sorry, future reader.
+        imageStore(imageTexture2, ivec2(gl_FragCoord.xy), vec4(dir, depth + 0.01));
     }
     else {
+        // Frag depths
+        float origDepth = texture(imageSampler2, v.xy).w;
+        float partDepth = gl_Color.x * 1000.0;
+
         // Render particles
         vec2 pos = gl_PointCoord.xy - vec2(0.5);
 	    float radius = length(pos);
-	    if(radius > 0.5) {
+	    if(radius > 0.5 || origDepth < partDepth) {
 		    discard;
 	    }
-        vec3 col = vec3(0.9, 0.6, 0.4);
-        if(gl_Color.y < 0.01) {
-            col = vec3(0.6, 0.9, 0.4);
-        }
 
-        float coc = 0.4 * abs(1.0 - length(0.2) / gl_Color.x);
+        vec3 col = vec3(0.9, 0.9, 0.9);
+
+        float coc = 0.4 * abs(0.8 / partDepth);
         coc = max(0.01 * 5.0, min(0.35 * 5.0, coc));
 
         f = vec4(col * (0.5 - radius), coc);

@@ -159,14 +159,14 @@ void entrypoint( void )
         unsigned int jx = ((i * 42144323) % 34423233) % (XRES * YRES);
         unsigned int jy = ((i * 12233123) % 85653223) % (XRES * YRES);
         unsigned int js = ((i * 53764312) % 23412352) % (XRES * YRES);
-        textureDataInitial[i * 4] = (((float)(jx % 1280) / 640.0) - 1.0) * 0.2;
-        textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) - 1.0;
-        textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.2;
+        textureDataInitial[i * 4] = (((float)(jx % 1280) / 1280.0) - 1.0) * 0.3 - 0.5;
+        textureDataInitial[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 2.0;
+        textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.3 - 0.5;
     }
 
 	// Create textures
-	GLuint imageTextures[4];
-	glGenTextures(4, imageTextures);
+	GLuint imageTextures[5];
+	glGenTextures(5, imageTextures);
 
 	((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
@@ -213,44 +213,51 @@ void entrypoint( void )
 	((PFNGLGENFRAMEBUFFERSPROC)wglGetProcAddress("glGenFramebuffers"))(1, &fbo);
 	((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, fbo);
 	((PFNGLFRAMEBUFFERTEXTURE2DPROC)wglGetProcAddress("glFramebufferTexture2D"))(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, imageTextures[0], 0);
-	
+
     glDisable(GL_DEPTH_TEST);
 
     // Pointing
     glEnable(GL_POINT_SPRITE);
     glBlendFunc(GL_ONE, GL_ONE);
 
+    glMatrixMode( GL_PROJECTION );
+
     // run
-	unsigned int samplast = 0;
-	unsigned int samplerun = 0;
+	int samplast = 0;
+    int fieldselector = 1;
     do
     {
         // get sample position for timing
         waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
 
+        int samplediff = ((float)(MMTime.u.sample - samplast));
+        samplast = MMTime.u.sample;
+
         // bind FBO to render world into
         ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, fbo);
 
         // Draw world, use glColor to send in timing
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
-        glColor4ui(MMTime.u.sample, 0, 0, 0);
+        glColor4ui(MMTime.u.sample, fieldselector * 65536, samplediff, 0);
         glRects(-1, -1, 1, 1);
 
-
         // Make a bunch of points happen
+        glPushMatrix();
+        glFrustum(-1, 1, -1 * ((float)YRES / (float)XRES), 1 * ((float)YRES / (float)XRES), 1.0, 100.0);
+
         ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE3);
         glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, textureData);
         glEnable(GL_BLEND);
         glPointSize(10.0);
         glBegin(GL_POINTS);
         for (int i = 0; i < 1280 * 10; i++) {
-            glColor4f(textureData[i * 4 + 2], textureDataInitial[i * 4], 0.0, 1.0);
+            glColor4f(textureData[i * 4 + 3] / 1000.0, fieldselector * 65536, 0.0, 1.0);
             glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
         }
         glEnd();
         glDisable(GL_BLEND);
+        glPopMatrix();
 
         // bind screen FB
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, 0);

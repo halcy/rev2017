@@ -39,7 +39,8 @@ void main() {
     f = vec4(1.0, 0.0, 0.2, 0.0);
 	vec2 uv = gl_FragCoord.xy/res;
     f = vec4(hexablur(postproc, uv), 0.0);
-      
+    // f = texture(postproc, uv);
+
     // Tonemap and gamma-correct
     f = f / (f + vec4(1.0));
     f.rgb = vec3(pow(f.r, 1.0 / 2.2), pow(f.g, 1.0 / 2.2), pow(f.b, 1.0 / 2.2));
