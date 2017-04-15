@@ -172,12 +172,12 @@ vec4 render_ducky(in float t, in vec4 dist, in vec3 pos ) {
     mat3 boxRot = mat3(sc.t, 0.0, sc.s,   0.0,  1.0, 0.0, -sc.s, 0.0, sc.t) *
 			        mat3(sc.t, sc.s, 0.0, -sc.s, sc.t, 0.0,   0.0, 0.0,  1.0);
 
-    vec3 duck_pos = vec3(-0.05, 0.6, 0.2);
+    vec3 duck_pos = vec3( -0.05,0.6,  0.2);
 
-    vec3 water_col = vec3( 0.0, 0.4, 10.0);
+    vec3 water_col = vec3(-1.0, 0.6, 10.0);
     vec3 eye_col =   vec3(80.8, 0.0,  0.0);
     vec3 mouth_col = vec3( 1.0, 0.07, 0.05);
-	vec3 body_col =  vec3( 0.8, 0.8,  0.1);
+	vec3 body_col =  vec3( 3.0, 1.5, -0.2);
 
 	float duck_size = 0.5;
 
