@@ -134,12 +134,30 @@ const int create_frag_shader(char *name, const char *shader_frag, HWND hWnd) {
 
 void entrypoint( void )
 { 
-	//#define SWITCH_AFTER (338688 * 2)
-	//#define SWITCH_AFTER_HALF 338688
-	int SWITCH_AFTER = 338688 * 2;
+	int SWITCH_AFTER = (SAMPLES_PER_TICK * PATTERN_SIZE) * 8;
 	int SWITCH_AFTER_HALF = SWITCH_AFTER / 2;
 	int outer_width = XRES;
 	int outer_height = YRES;
+
+    // Sync stuff
+    int effect_advance_at[] = {
+        SWITCH_AFTER, 
+        SWITCH_AFTER * 2, 
+        SWITCH_AFTER * 3, 
+        SWITCH_AFTER * 4, 
+        SWITCH_AFTER * 5, 
+        SWITCH_AFTER * 6
+    };
+
+    int wants_particles[] = {
+        0, 
+        1, 
+        0,
+        1,
+        0,
+        1
+    };
+
 #ifdef FULLSCREEN
     // full screen
     if( ChangeDisplaySettings(&screenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL) return; ShowCursor( 0 );
@@ -236,11 +254,27 @@ void entrypoint( void )
 
     // run
 	int samplast = 0;
-    int fieldselector = 1;
+    int fieldselector = 0;
+    int sceneselector = 0;
     do
     {
         // get sample position for timing
         waveOutGetPosition(hWaveOut, &MMTime, sizeof(MMTIME));
+
+        // Advance?
+        if (MMTime.u.sample > effect_advance_at[sceneselector]) {
+            sceneselector++;
+
+            if(wants_particles[sceneselector]) {
+                ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitial);
+
+                ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE2);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, textureDataInitialZero);
+            }
+        }
+
+        fieldselector = sceneselector % 2;
 
         int samplediff = ((float)(MMTime.u.sample - samplast));
         samplast = MMTime.u.sample;
@@ -255,21 +289,23 @@ void entrypoint( void )
         glRects(-1, -1, 1, 1);
 
         // Make a bunch of points happen
-        glPushMatrix();
-        glFrustum(-1, 1, -1 * ((float)YRES / (float)XRES), 1 * ((float)YRES / (float)XRES), 1.0, 100.0);
+        if(wants_particles[sceneselector]) {
+            glPushMatrix();
+            glFrustum(-1, 1, -1 * ((float)YRES / (float)XRES), 1 * ((float)YRES / (float)XRES), 1.0, 100.0);
 
-        ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE3);
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, textureData);
-        glEnable(GL_BLEND);
-        glPointSize(10.0);
-        glBegin(GL_POINTS);
-        for (int i = 0; i < 1280 * 10; i++) {
-            glColor4f(textureData[i * 4 + 3] / 1000.0, fieldselector * 65536, 0.0, 1.0);
-            glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
+            ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE3);
+            glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, textureData);
+            glEnable(GL_BLEND);
+            glPointSize(10.0);
+            glBegin(GL_POINTS);
+            for (int i = 0; i < 1280 * 10; i++) {
+                glColor4f(textureData[i * 4 + 3] / 1000.0, fieldselector * 65536, 0.0, 1.0);
+                glVertex3f(textureData[i * 4], textureData[i * 4 + 1], textureData[i * 4 + 2]);
+            }
+            glEnd();
+            glDisable(GL_BLEND);
+            glPopMatrix();
         }
-        glEnd();
-        glDisable(GL_BLEND);
-        glPopMatrix();
 
         // bind screen FB
 		((PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer"))(GL_FRAMEBUFFER, 0);

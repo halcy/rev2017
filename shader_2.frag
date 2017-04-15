@@ -48,7 +48,7 @@ vec4 distfunc(vec3 pos) {
     float fieldselect = gl_Color.y * 65536.0;
 
   	vec4 box = vec4(0.0);
-    box.xyz = vec3(0.3 * pos.y, 0.3, 0.3);
+    box.xyz = vec3(0.3 * pos.y, 0.3, 0.3) * (fract(pos).x > 0.5 ? 1.0 : 0.2);
     box.a = min(min(pos.y, -abs(pos.z) + 2.0), -abs(pos.x) + 2.0);;
     
     vec4 dist = box;
@@ -66,12 +66,14 @@ vec4 distfunc(vec3 pos) {
        	    ballPos.y += 1.2;
        	
             float radius = 0.3;
-        
+
             radius += (sin(pos.x * 40.0) + cos(pos.z * 40.0) + sin(pos.y * 40.0)) * 0.01;
             radius += (hash33(pos) * 0.003).x;
             vec3 col = vec3(radius > 0.33 ? 200.0 : 0.2) * vec3(i * 0.1, 0.2 + (15 - i) * 0.4, i * 0.8);
-            vec4 ball = vec4(col, length(ballPos - pos) - radius);
-            dist = distcompose(dist, ball, 0.3);
+            float stripes = (fract(pos * 5.0).z > 0.5 ? 1.0 : 0.2);
+            col = col * stripes;
+            vec4 ball = vec4(col, (length(ballPos - pos) - radius));
+            dist = distcompose(dist, ball, 0.3 * stripes);
         }
     }
 
@@ -195,7 +197,7 @@ vec4 pixel(vec2 fragCoord, out float depth) {
 
     // Shading
     float light = max(0.0, dot(normal, shadowray)) * penumbra + 0.1;
-    vec3 colorval = light * distfunc(pos).rgb * (fract(pos).x > 0.5 ? 1.0 : 0.2);
+    vec3 colorval = light * distfunc(pos).rgb;
    
     // Calculate CoC (limited to a maximum size) and store
     depth = length(pos - eye);
