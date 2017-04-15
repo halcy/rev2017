@@ -103,6 +103,17 @@ void bind_res(int p) {
 	((PFNGLUNIFORM2FPROC)wglGetProcAddress("glUniform2f"))(res_loc, XRES, YRES);
 }
 
+/*float get_Envelope(int instrument) {
+    return(&_4klang_envelope_buffer)[((MMTime.u.sample >> 8) << 5) + 2*instrument];
+}*/
+
+void send_envelope(int p) {
+    /*float env = get_Envelope(0);
+    ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
+    GLint env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope");
+    ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env);*/
+}
+
 // Image texture binding
 typedef void (APIENTRYP PFNGLBINDIMAGETEXTUREEXTPROC) (GLuint index, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLint format);
 
@@ -142,13 +153,14 @@ void entrypoint( void )
 
     // Sync stuff
     int effect_advance_at[] = {
-        PATTERN_LEN * 6,
-        PATTERN_LEN * 18,
-        PATTERN_LEN * 36,
-        PATTERN_LEN * 54, // Done up to here
-        PATTERN_LEN * 60,
-        PATTERN_LEN * 75,
-        PATTERN_LEN * 100,
+        PATTERN_LEN * 6, // Noise
+        PATTERN_LEN * 18, // Twister
+        PATTERN_LEN * 36, // Balls
+        PATTERN_LEN * 54, // Cubes
+        PATTERN_LEN * 66, // Duck (TODO)
+        PATTERN_LEN * 78, // Tunnel
+        PATTERN_LEN * 90, // Finis
+        PATTERN_LEN * 200 // Finis
     };
 
     int effect_type[] = {
@@ -308,6 +320,19 @@ void entrypoint( void )
 
         // Draw world, use glColor to send in timing
 		((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p2);
+        send_envelope(p2);
+        
+        float improve_effect = 0.0;
+        if (MMTime.u.sample > effect_advance_at[sceneselector] - PATTERN_LEN * 12) {
+            improve_effect = 1.0;
+        }
+
+        if (MMTime.u.sample > effect_advance_at[sceneselector] - PATTERN_LEN * 6) {
+            improve_effect = 2.0;
+        }
+        GLint res_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p2, "improve");
+        ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(res_loc, improve_effect);
+
         glColor4ui(MMTime.u.sample, effselector * 65536, samplediff, 0);
         glRects(-1, -1, 1, 1);
 
