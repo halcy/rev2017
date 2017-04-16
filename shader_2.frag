@@ -5,6 +5,7 @@ in vec4 gl_Color;
 uniform vec2 res;
 uniform float envelope;
 uniform float envelope_lp;
+uniform float envelope_lp_sum;
 uniform float improve;
 
 layout(size4x32,binding=0) uniform image2D imageTexture;
@@ -30,7 +31,7 @@ float rand(vec2 co){
 }
 
 vec4 tunnel() {
-    float time = gl_Color.x * 3000.0 * 10.0;
+    float time = (gl_Color.x + 5.0) * 3000.0 * 10.0 + envelope_lp_sum * 0.3;
    
     vec2 p=(2.0*gl_FragCoord.xy-res)/min(res.x,res.y)*0.5;
 
@@ -225,7 +226,12 @@ vec4 distfunc(vec3 pos) {
     if(abs(effselect - 1.0) < 0.1) {
         float posproj = dot(pos, normalize(vec3(0.3, 0.7, 0.1)));
         box.xyz = vec3(0.1, 0.3 * pos.y, 0.3) * (fract(pos).z > 0.5 ? 1.0 : 0.2);
-        box.xyz += (fract(posproj * 2.0) > 0.5 ? envelope * 0.5 : 0.0);
+        box.xyz *= (fract(posproj * 2.0) > 0.5 ? 1.0 - (envelope * 0.4) : 1.0);
+    }
+
+    if(abs(effselect - 5.0) < 0.1) {
+        box.xyz = vec3(0.3 * pos.y, 0.3, 0.3) * (fract(pos).x > 0.5 ? 1.0 : 0.2) * (fract(pos).y > 0.5 ? 1.0 : 0.2) *  (fract(pos).z > 0.5 ? 1.0 : 0.2);
+        box.a = min(min(pos.y, -abs(pos.z) + 2.0), -abs(pos.x) + 2.0);;
     }
 
     vec4 dist = box;
@@ -410,7 +416,8 @@ void main() {
         // Render box
         float depth;
         f = pixel(gl_FragCoord.xy + hash33(vec3(gl_FragCoord.xy, 1.0)).xy, depth);
-       
+        f += vec4(vec3(hash33(vec3(gl_FragCoord.xy * 2.0, t)).x) * 0.02, 0.0);
+
         // Preload dir here for HACKS reasons
         vec3 dir = texture(imageSampler2, v.xy).xyz;
 

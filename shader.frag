@@ -38,7 +38,7 @@ vec3 hexablur(sampler2D tex, vec2 uv) {
     return(col);
 }
 
-float atten (float v) { return 1.0 - pow( abs( ( v - .5 ) * 1.8 ), 6.0 ); }
+float atten (float v) { return 1.0 - pow( abs( ( v - .5 ) * 1.9), 6.0 ); }
 
 void main() {
 	float t = gl_Color.x * 3000.0 * 50.0;

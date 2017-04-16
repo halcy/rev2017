@@ -18,7 +18,7 @@
 #define XRES 1280
 #define YRES 720
 #endif
-#define FULLSCREEN
+//#define FULLSCREEN
 #define XSCALE ((float)YRES/(float)XRES)
 #define SHADER_CHECK
 
@@ -109,9 +109,11 @@ extern "C" float get_Envelope(int instrument) {
 }
 
 float env_decay = 0.0;
+float env_sum = 0.0;
 void send_envelope(int p, float dt) {
     float env = get_Envelope(7) + get_Envelope(6);
     env_decay = env_decay * (1.0 - 0.2 * dt) + env * 0.2 * dt;
+    env_sum += env * dt;
 
     ((PFNGLUSEPROGRAMPROC)wglGetProcAddress("glUseProgram"))(p);
     GLint env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope");
@@ -119,6 +121,9 @@ void send_envelope(int p, float dt) {
 
     env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope_lp");
     ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env_decay);
+
+    env_loc = ((PFNGLGETUNIFORMLOCATIONPROC)wglGetProcAddress("glGetUniformLocation"))(p, "envelope_lp_sum");
+    ((PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f"))(env_loc, env_sum);
 }
 
 // Image texture binding
@@ -223,7 +228,7 @@ void entrypoint( void )
         textureDataInitial[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.4;
 
         textureDataInitialDuck[i * 4] = (((float)(jx % 1280) / 1280.0)) * 0.2 - 1.1;
-        textureDataInitialDuck[i * 4 + 1] = (((float)jy / 720.0) / 360.0) + 0.1;
+        textureDataInitialDuck[i * 4 + 1] = (((float)jy / 720.0) / 360.0) * 1.3 - 1.3;
         textureDataInitialDuck[i * 4 + 2] = ((float)((js % (80 * 400)) / (80.0 * 400.0))) * 0.2;
     }
 
@@ -235,6 +240,8 @@ void entrypoint( void )
 	glBindTexture(GL_TEXTURE_2D, imageTextures[0]);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, XRES, YRES, 0, GL_RGBA, GL_FLOAT, 0);
 
     ((PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture"))(GL_TEXTURE1);
