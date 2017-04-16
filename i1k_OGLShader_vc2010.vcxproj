@@ -397,8 +397,8 @@ sm\shader_minifier.exe shader_2.frag --preserve-externals -o src/shader_code_2.h
       <OutputFile>.\bin/Release/i1k_OGLShader_vc2010.bsc</OutputFile>
     </Bscmake>
     <PreBuildEvent>
-      <Command>shader_minifier.exe shader.frag --no-renaming --preserve-externals -o src/shader_code.h
-shader_minifier.exe shader_2.frag --no-renaming --preserve-externals -o src/shader_code_2.h</Command>
+      <Command>perl shader-to-c-header.pl shader.frag src/shader_code.h
+perl shader-to-c-header.pl shader_2.frag src/shader_code_2.h</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

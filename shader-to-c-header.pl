@@ -18,7 +18,8 @@ sub main
         while (<$input>) {
             chomp;
             next unless $_;
-            push @out_lines, "\"$_\\n\"";
+            $_ =~ s/"/\\"/g;
+            push @out_lines, qq["$_\\n"];
         }
         $input->close;
     }
@@ -27,7 +28,7 @@ sub main
     push @header_lines, "#define $header_ifndef_name";
     push @header_lines, "const char* $header_const_char_name =";
     push @header_lines, join("\n", @out_lines) . ";";
-    push @header_lines, "#endif /* $header_ifndef_name /*";
+    push @header_lines, "#endif /* $header_ifndef_name */";
 
     my $output = FileHandle->new("> $c_header_output_file");
     if (defined $output) {
