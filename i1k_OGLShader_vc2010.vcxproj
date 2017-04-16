@@ -130,7 +130,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;4klang.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)4verts_deb.pdb</ProgramDatabaseFile>
@@ -189,7 +189,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/CRINKLER /HASHTRIES:2400 /COMPMODE:SLOW /ORDERTRIES:48000 /REPORT:compress.htm %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;4klang.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
@@ -378,7 +378,7 @@ sm\shader_minifier.exe shader_2.frag --preserve-externals -o src/shader_code_2.h
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/CRINKLER /HASHTRIES:300 /COMPMODE:INSTANT /ORDERTRIES:4000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>opengl32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;winmm.lib;4klang.obj;%(AdditionalDependencies)</AdditionalDependencies>
       <ShowProgress>NotSet</ShowProgress>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
